@@ -1,0 +1,159 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#0f172a;
+  color:white;
+  min-height:100vh;
+}
+
+.screen{
+  padding:20px;
+}
+
+.hidden{
+  display:none;
+}
+
+.brand{
+  text-align:center;
+  margin-top:40px;
+}
+
+.brand-logo{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:#22c55e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:auto;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.auth-box,
+.card,
+.modal-content{
+  background:#1e293b;
+  border-radius:20px;
+  padding:20px;
+  margin-top:20px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:12px;
+  background:#334155;
+  color:white;
+}
+
+button{
+  cursor:pointer;
+}
+
+.primary-btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#22c55e;
+  color:white;
+  font-size:16px;
+}
+
+.link-btn{
+  background:none;
+  border:none;
+  color:#22c55e;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+  margin-top:20px;
+}
+
+.stat-card{
+  background:#1e293b;
+  border-radius:15px;
+  padding:15px;
+  text-align:center;
+}
+
+.progress{
+  background:#334155;
+  height:12px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.progress-bar{
+  width:0%;
+  height:100%;
+  background:#22c55e;
+}
+
+.action-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+  margin-top:20px;
+}
+
+.action-card{
+  background:#1e293b;
+  border:none;
+  border-radius:20px;
+  padding:20px;
+  color:white;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-content{
+  width:90%;
+  max-width:500px;
+}
+
+.close-modal{
+  float:left;
+  border:none;
+  background:red;
+  color:white;
+  width:35px;
+  height:35px;
+  border-radius:50%;
+}
+
+.pro-card{
+  background:linear-gradient(45deg,#f59e0b,#f97316);
+  padding:20px;
+  border-radius:20px;
+  margin-top:20px;
+}
+
+.water-counter{
+  text-align:center;
+  font-size:40px;
+  margin:20px 0;
+}
