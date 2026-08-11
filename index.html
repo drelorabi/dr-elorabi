@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>dr.elorabi</title>
+
+  <meta name="description"
+        content="dr.elorabi - Personal Health, Fitness & Nutrition">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       APP
+  ========================== -->
+
+  <div id="app">
+
+    <!-- =========================
+         AUTH SCREEN
+    ========================== -->
+
+    <section id="authScreen" class="screen">
+
+      <div class="brand">
+        <div class="brand-logo">dr.</div>
+        <h1>elorabi</h1>
+        <p>صحتك. جسمك. يومك.</p>
+      </div>
+
+      <!-- LOGIN -->
+
+      <div id="loginBox" class="auth-box">
+
+        <h2>اهلا بيك 👋</h2>
+
+        <p class="muted">
+          سجل دخولك عشان نبدأ نبني يومك
+        </p>
+
+        <form id="loginForm">
+
+          <label>البريد الالكتروني</label>
+
+          <input
+            id="loginEmail"
+            type="email"
+            placeholder="example@email.com"
+            required
+          >
+
+          <label>كلمة المرور</label>
+
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="••••••••"
+            required
+          >
+
+          <button type="submit" class="primary-btn">
+            تسجيل الدخول
+          </button>
+
+        </form>
+
+        <p class="switch-text">
+          لسه جديد؟
+          <button id="showSignup" class="link-btn">
+            اعمل حساب
+          </button>
+        </p>
+
+      </div>
+
+
+      <!-- SIGN UP -->
+
+      <div id="signupBox" class="auth-box hidden">
+
+        <h2>اعمل حسابك</h2>
+
+        <p class="muted">
+          بياناتك هتتحفظ بشكل امن في حسابك
+        </p>
+
+        <form id="signupForm">
+
+          <label>البريد الالكتروني</label>
+
+          <input
+            id="signupEmail"
+            type="email"
+            placeholder="example@email.com"
+            required
+          >
+
+          <label>كلمة المرور</label>
+
+          <input
+            id="signupPassword"
+            type="password"
+            minlength="6"
+            placeholder="6 حروف او اكتر"
+            required
+          >
+
+          <button type="submit" class="primary-btn">
+            انشاء الحساب
+          </button>
+
+        </form>
+
+        <p class="switch-text">
+          عندك حساب؟
+          <button id="showLogin" class="link-btn">
+            تسجيل الدخول
+          </button>
+        </p>
+
+      </div>
+
+      <div id="authMessage" class="message"></div>
+
+    </section>
+
+
+    <!-- =========================
+         PROFILE SCREEN
+    ========================== -->
+
+    <section id="profileScreen" class="screen hidden">
+
+      <div class="topbar">
+
+        <div>
+          <span class="small-label">dr.elorabi</span>
+          <h2>خلينا نعرفك اكتر</h2>
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>بياناتك الاساسية</h3>
+
+        <form id="profileForm">
+
+          <label>الاسم</label>
+
+          <input
+            id="fullName"
+            type="text"
+            placeholder="اكتب اسمك"
+            required
+          >
+
+
+          <label>تاريخ الميلاد</label>
+
+          <input
+            id="birthDate"
+            type="date"
+            required
+          >
+
+
+          <label>النوع</label>
+
+          <select id="gender" required>
+
+            <option value="">
+              اختار
+            </option>
+
+            <option value="male">
+              ذكر
+            </option>
+
+            <option value="female">
+              انثى
+            </option>
+
+            <option value="other">
+              افضل عدم التحديد
+            </option>
+
+          </select>
+
+
+          <div class="two-columns">
+
+            <div>
+
+              <label>الطول سم</label>
+
+              <input
+                id="height"
+                type="number"
+                min="100"
+                max="250"
+                placeholder="180"
+                required
+              >
+
+            </div>
+
+            <div>
+
+              <label>الوزن كجم</label>
+
+              <input
+                id="weight"
+                type="number"
+                min="25"
+                max="300"
+                step="0.1"
+                placeholder="80"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <label>هدفك ايه؟</label>
+
+          <select id="goal" required>
+
+            <option value="">
+              اختار هدفك
+            </option>
+
+            <option value="fat_loss">
+              خسارة دهون
+            </option>
+
+            <option value="muscle_gain">
+              بناء عضلات
+            </option>
+
+            <option value="recomposition">
+              بناء عضلات + خسارة دهون
+            </option>
+
+            <option value="maintenance">
+              تثبيت الوزن وتحسين اللياقة
+            </option>
+
+          </select>
+
+
+          <label>مستوى نشاطك</label>
+
+          <select id="activity" required>
+
+            <option value="">
+              اختار
+            </option>
+
+            <option value="sedentary">
+              قليل الحركة
+            </option>
+
+            <option value="light">
+              نشاط خفيف
+            </option>
+
+            <option value="moderate">
+              نشاط متوسط
+            </option>
+
+            <option value="high">
+              نشاط عالي
+            </option>
+
+          </select>
+
+
+          <label>
+            بتحب تاكل ايه؟
+          </label>
+
+          <textarea
+            id="likedFoods"
+            placeholder="مثلا: فراخ، رز، بطاطس، بيض، مكرونة..."
+          ></textarea>
+
+
+          <label>
+            مش بتحب ايه؟
+          </label>
+
+          <textarea
+            id="dislikedFoods"
+            placeholder="مثلا: سمك، بصل..."
+          ></textarea>
+
+
+          <label>
+            عندك حساسية من حاجة؟
+          </label>
+
+          <textarea
+            id="allergies"
+            placeholder="اكتب لو فيه"
+          ></textarea>
+
+
+          <label>
+            كام وجبة بتحب تاكل في اليوم؟
+          </label>
+
+          <select id="mealsPerDay">
+
+            <option value="3">
+              3 وجبات
+            </option>
+
+            <option value="4" selected>
+              4 وجبات
+            </option>
+
+            <option value="5">
+              5 وجبات
+            </option>
+
+            <option value="6">
+              6 وجبات
+            </option>
+
+          </select>
+
+
+          <button
+            type="submit"
+            class="primary-btn"
+          >
+            ابدأ خطتي 🚀
+          </button>
+
+        </form>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         DASHBOARD
+    ========================== -->
+
+    <section id="dashboardScreen" class="screen hidden">
+
+      <header class="dashboard-header">
+
+        <div>
+
+          <span class="small-label">
+            dr.elorabi
+          </span>
+
+          <h1>
+            <span id="welcomeName">
+              اهلا بيك
+            </span>
+            👋
+          </h1>
+
+          <p id="todayText"></p>
+
+        </div>
+
+        <button
+          id="logoutBtn"
+          class="logout-btn"
+        >
+          خروج
+        </button>
+
+      </header>
+
+
+      <!-- DAILY TARGETS -->
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+
+          <span>السعرات</span>
+
+          <strong id="calorieTarget">
+            0
+          </strong>
+
+          <small>kcal</small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>البروتين</span>
+
+          <strong id="proteinTarget">
+            0
+          </strong>
+
+          <small>g</small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>المياه</span>
+
+          <strong id="waterTarget">
+            0
+          </strong>
+
+          <small>ml</small>
+
+        </div>
+
+
+        <div class="stat-card">
+
+          <span>BMI</span>
+
+          <strong id="bmiValue">
+            0
+          </strong>
+
+          <small id="bmiStatus">
+            -
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <!-- TODAY -->
+
+      <div class="card">
+
+        <div class="section-title">
+
+          <div>
+            <span class="small-label">
+              TODAY
+            </span>
+
+            <h2>
+              يومك
+            </h2>
+          </div>
+
+        </div>
+
+
+        <div class="progress-box">
+
+          <div class="progress-header">
+
+            <span>
+              السعرات
+            </span>
+
+            <strong>
+              <span id="caloriesConsumed">
+                0
+              </span>
+              /
+              <span id="caloriesGoal">
+                0
+              </span>
+            </strong>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              id="calorieProgress"
+              class="progress-bar"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+        <div class="progress-box">
+
+          <div class="progress-header">
+
+            <span>
+              البروتين
+            </span>
+
+            <strong>
+              <span id="proteinConsumed">
+                0
+              </span>
+              /
+              <span id="proteinGoal">
+                0
+              </span>
+              g
+            </strong>
+
+          </div>
+
+          <div class="progress">
+
+            <div
+              id="proteinProgress"
+              class="progress-bar"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="action-grid">
+
+        <button
+          class="action-card"
+          id="logFoodBtn"
+        >
+
+          <span class="action-icon">
+            🍽️
+          </span>
+
+          <strong>
+            سجل اكل دلوقتي
+          </strong>
+
+          <small>
+            نحسب السعرات والبروتين
+          </small>
+
+        </button>
+
+
+        <button
+          class="action-card"
+          id="waterBtn"
+        >
+
+          <span class="action-icon">
+            💧
+          </span>
+
+          <strong>
+            سجل مياه
+          </strong>
+
+          <small>
+            تابع شرب المياه
+          </small>
+
+        </button>
+
+
+        <button
+          class="action-card"
+          id="sleepBtn"
+        >
+
+          <span class="action-icon">
+            😴
+          </span>
+
+          <strong>
+            النوم
+          </strong>
+
+          <small>
+            سجل نومك وصحيانك
+          </small>
+
+        </button>
+
+
+        <button
+          class="action-card"
+          id="exerciseBtn"
+        >
+
+          <span class="action-icon">
+            🏋️
+          </span>
+
+          <strong>
+            التمرين
+          </strong>
+
+          <small>
+            سجل تمرينك
+          </small>
+
+        </button>
+
+      </div>
+
+
+      <!-- FOOD LOG -->
+
+      <div class="card">
+
+        <div class="section-title">
+
+          <div>
+            <span class="small-label">
+              NUTRITION
+            </span>
+
+            <h2>
+              اكل النهارده
+            </h2>
+          </div>
+
+        </div>
+
+        <div id="foodList">
+
+          <div class="empty-state">
+            مفيش وجبات مسجلة لسه
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- WATER -->
+
+      <div class="card">
+
+        <div class="section-title">
+
+          <div>
+            <span class="small-label">
+              HYDRATION
+            </span>
+
+            <h2>
+              المياه
+            </h2>
+
+          </div>
+
+        </div>
+
+        <div class="water-counter">
+
+          <strong id="waterConsumed">
+            0
+          </strong>
+
+          <span>
+            ml
+          </span>
+
+        </div>
+
+        <button
+          id="addWaterBtn"
+          class="primary-btn"
+        >
+          + 250 ml
+        </button>
+
+      </div>
+
+
+      <!-- PRO -->
+
+      <div class="pro-card">
+
+        <div>
+
+          <span class="pro-badge">
+            PRO
+          </span>
+
+          <h2>
+            خليك متحكم في يومك بالكامل
+          </h2>
+
+          <p>
+            خطط اكل وتمارين ومتابعة متقدمة
+          </p>
+
+        </div>
+
+        <button id="proBtn">
+          اشترك
+        </button>
+
+      </div>
+
+
+    </section>
+
+
+    <!-- =========================
+         FOOD MODAL
+    ========================== -->
+
+    <div
+      id="foodModal"
+      class="modal hidden"
+    >
+
+      <div class="modal-content">
+
+        <button
+          class="close-modal"
+          data-close="foodModal"
+        >
+          ×
+        </button>
+
+        <h2>
+          سجل وجبتك 🍽️
+        </h2>
+
+        <p class="muted">
+          اكتب الوجبة والكمية، وهنحسبها
+        </p>
+
+        <form id="foodForm">
+
+          <label>
+            اسم الوجبة
+          </label>
+
+          <input
+            id="foodName"
+            type="text"
+            placeholder="مثلا: 200 جرام فراخ + 150 جرام رز"
+            required
+          >
+
+          <label>
+            النوع
+          </label>
+
+          <select id="mealType">
+
+            <option value="breakfast">
+              فطار
+            </option>
+
+            <option value="lunch">
+              غدا
+            </option>
+
+            <option value="dinner">
+              عشا
+            </option>
+
+            <option value="snack">
+              سناك
+            </option>
+
+            <option value="dessert">
+              ديزرت
+            </option>
+
+          </select>
+
+
+          <label>
+            السعرات التقريبية
+          </label>
+
+          <input
+            id="foodCalories"
+            type="number"
+            min="0"
+            placeholder="مثلا 650"
+            required
+          >
+
+
+          <label>
+            البروتين بالجرام
+          </label>
+
+          <input
+            id="foodProtein"
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder="مثلا 45"
+            required
+          >
+
+          <button
+            type="submit"
+            class="primary-btn"
+          >
+            حفظ الوجبة
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         SLEEP MODAL
+    ========================== -->
+
+    <div
+      id="sleepModal"
+      class="modal hidden"
+    >
+
+      <div class="modal-content">
+
+        <button
+          class="close-modal"
+          data-close="sleepModal"
+        >
+          ×
+        </button>
+
+        <h2>
+          النوم 😴
+        </h2>
+
+        <form id="sleepForm">
+
+          <label>
+            وقت النوم
+          </label>
+
+          <input
+            id="sleepTime"
+            type="datetime-local"
+            required
+          >
+
+          <label>
+            وقت الصحيان
+          </label>
+
+          <input
+            id="wakeTime"
+            type="datetime-local"
+            required
+          >
+
+          <button
+            type="submit"
+            class="primary-btn"
+          >
+            حساب النوم
+          </button>
+
+        </form>
+
+        <div id="sleepResult"></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         EXERCISE MODAL
+    ========================== -->
+
+    <div
+      id="exerciseModal"
+      class="modal hidden"
+    >
+
+      <div class="modal-content">
+
+        <button
+          class="close-modal"
+          data-close="exerciseModal"
+        >
+          ×
+        </button>
+
+        <h2>
+          سجل تمرينك 🏋️
+        </h2>
+
+        <form id="exerciseForm">
+
+          <label>
+            اسم التمرين
+          </label>
+
+          <input
+            id="exerciseName"
+            type="text"
+            placeholder="مثلا: Push Day"
+            required
+          >
+
+          <label>
+            المدة بالدقائق
+          </label>
+
+          <input
+            id="exerciseDuration"
+            type="number"
+            min="1"
+            placeholder="60"
+            required
+          >
+
+          <label>
+            السعرات المحروقة
+          </label>
+
+          <input
+            id="exerciseCalories"
+            type="number"
+            min="0"
+            placeholder="300"
+            required
+          >
+
+          <button
+            type="submit"
+            class="primary-btn"
+          >
+            حفظ التمرين
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         PRO MODAL
+    ========================== -->
+
+    <div
+      id="proModal"
+      class="modal hidden"
+    >
+
+      <div class="modal-content">
+
+        <button
+          class="close-modal"
+          data-close="proModal"
+        >
+          ×
+        </button>
+
+        <span class="pro-badge">
+          PRO
+        </span>
+
+        <h2>
+          dr.elorabi PRO
+        </h2>
+
+        <div class="price">
+          50 جنيه
+          <small>/ شهر</small>
+        </div>
+
+        <ul class="feature-list">
+
+          <li>
+            خطة يومية متكاملة
+          </li>
+
+          <li>
+            أكل بالجرامات
+          </li>
+
+          <li>
+            حساب السعرات والبروتين
+          </li>
+
+          <li>
+            خطة تمارين
+          </li>
+
+          <li>
+            متابعة التقدم
+          </li>
+
+          <li>
+            سجل النوم
+          </li>
+
+        </ul>
+
+        <button
+          id="requestProBtn"
+          class="primary-btn"
+        >
+          طلب تفعيل PRO
+        </button>
+
+        <p id="proMessage"></p>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- SUPABASE -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
