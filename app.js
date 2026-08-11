@@ -1,23 +1,24 @@
 /* =========================================================
    dr.elorabi
    Personal Health, Fitness & Nutrition App
-   DEMO VERSION
-   ========================================================= */
+   SUPABASE CONNECTED VERSION
+========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // =========================
+  // =======================================================
   // SUPABASE
-  // =========================
+  // =======================================================
 
-  const SUPABASE_URL = "https://cwnjzwmficiuoybimqsc.supabase.co";
+  const SUPABASE_URL =
+    "https://cwnjzwmficiuoybimqsc.supabase.co";
 
   const SUPABASE_KEY =
     "sb_publishable_HYnTEROkcBw7lrIKKNl21A_fmi1TsQV";
 
   let supabaseClient = null;
 
-  if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+  if (window.supabase) {
     try {
       supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
@@ -28,35 +29,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // =========================
+  // =======================================================
   // HELPERS
-  // =========================
+  // =======================================================
 
-  const $ = (selector) => document.querySelector(selector);
+  const $ = (selector) =>
+    document.querySelector(selector);
 
-  const $$ = (selector) => {
-    return Array.from(document.querySelectorAll(selector));
-  };
+  const $$ = (selector) =>
+    Array.from(document.querySelectorAll(selector));
 
-  function showMessage(message, type = "info") {
-
+  function showMessage(message) {
     let box = $("#appMessage");
 
     if (!box) {
       box = document.createElement("div");
       box.id = "appMessage";
 
-      box.style.position = "fixed";
-      box.style.left = "20px";
-      box.style.right = "20px";
-      box.style.bottom = "20px";
-      box.style.zIndex = "99999";
-      box.style.padding = "15px";
-      box.style.borderRadius = "14px";
-      box.style.background = "#111827";
-      box.style.color = "white";
-      box.style.textAlign = "center";
-      box.style.fontWeight = "600";
+      Object.assign(box.style, {
+        position: "fixed",
+        left: "20px",
+        right: "20px",
+        bottom: "20px",
+        zIndex: "99999",
+        padding: "15px",
+        borderRadius: "14px",
+        background: "#111827",
+        color: "white",
+        textAlign: "center",
+        fontWeight: "600"
+      });
 
       document.body.appendChild(box);
     }
@@ -71,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function safeText(selector, value) {
-
     const element = $(selector);
 
     if (element) {
@@ -80,19 +81,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getNumber(selector, fallback = 0) {
-
     const element = $(selector);
 
     if (!element) return fallback;
 
     const number = Number(element.value);
 
-    return Number.isFinite(number) ? number : fallback;
+    return Number.isFinite(number)
+      ? number
+      : fallback;
   }
 
-  // =========================
-  // LOCAL USER DATA
-  // =========================
+  function todayDate() {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  // =======================================================
+  // LOCAL CACHE
+  // =======================================================
 
   const STORAGE_KEY = "dr_elorabi_user";
 
@@ -107,24 +113,54 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function saveLocalData() {
-
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(userData)
     );
   }
 
-  // =========================
-  // AGE CALCULATOR
-  // =========================
+  // =======================================================
+  // CURRENT AUTH USER
+  // =======================================================
+
+  let currentUser = null;
+
+  async function getCurrentUser() {
+    if (!supabaseClient) return null;
+
+    try {
+      const {
+        data,
+        error
+      } = await supabaseClient.auth.getUser();
+
+      if (error) {
+        console.error(error);
+        return null;
+      }
+
+      currentUser = data?.user || null;
+
+      return currentUser;
+
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  // =======================================================
+  // AGE
+  // =======================================================
 
   function calculateAge(dateString) {
-
     if (!dateString) return 0;
 
     const birth = new Date(dateString);
 
-    if (Number.isNaN(birth.getTime())) return 0;
+    if (Number.isNaN(birth.getTime())) {
+      return 0;
+    }
 
     const today = new Date();
 
@@ -149,9 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(0, age);
   }
 
-  // =========================
+  // =======================================================
   // CALORIE CALCULATOR
-  // =========================
+  // =======================================================
 
   function calculateCalories() {
 
@@ -161,15 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const height =
       getNumber("#height", 0);
 
-    let birthDate = "";
+    const birthDate =
+      $("#birthDate")?.value || "";
 
-    const birthElement = $("#birthDate");
-
-    if (birthElement) {
-      birthDate = birthElement.value;
-    }
-
-    const age = calculateAge(birthDate);
+    const age =
+      calculateAge(birthDate);
 
     const genderElement =
       $("input[name='gender']:checked");
@@ -206,37 +238,35 @@ document.addEventListener("DOMContentLoaded", () => {
         5;
     }
 
-    const activityElement =
-      $("#activityLevel");
-
     const activity =
-      activityElement
-        ? Number(activityElement.value)
-        : 1.375;
+      Number(
+        $("#activityLevel")?.value ||
+        1.375
+      );
 
     const maintenance =
       bmr * activity;
 
-    const goalElement =
-      $("#goal");
-
     const goal =
-      goalElement
-        ? goalElement.value
-        : "maintain";
+      $("#goal")?.value ||
+      "maintain";
 
-    let target = maintenance;
+    let target =
+      maintenance;
 
     if (goal === "lose") {
-      target = maintenance - 400;
+      target =
+        maintenance - 400;
     }
 
     if (goal === "gain") {
-      target = maintenance + 250;
+      target =
+        maintenance + 250;
     }
 
     if (goal === "recomp") {
-      target = maintenance - 150;
+      target =
+        maintenance - 150;
     }
 
     const protein =
@@ -245,15 +275,17 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       age,
       bmr: Math.round(bmr),
-      maintenance: Math.round(maintenance),
-      calories: Math.round(target),
+      maintenance:
+        Math.round(maintenance),
+      calories:
+        Math.round(target),
       protein
     };
   }
 
-  // =========================
-  // UPDATE DASHBOARD
-  // =========================
+  // =======================================================
+  // DASHBOARD
+  // =======================================================
 
   function updateDashboard() {
 
@@ -287,14 +319,76 @@ document.addEventListener("DOMContentLoaded", () => {
       `${result.age} سنة`
     );
 
-    userData.targets = result;
+    userData.targets =
+      result;
 
     saveLocalData();
   }
 
-  // =========================
+  // =======================================================
+  // SAVE PROFILE TO SUPABASE
+  // =======================================================
+
+  async function saveProfileToSupabase() {
+
+    if (!supabaseClient) return;
+
+    const user =
+      currentUser ||
+      await getCurrentUser();
+
+    if (!user) {
+      return;
+    }
+
+    const profile = {
+      id: user.id,
+      full_name:
+        $("#name")?.value?.trim() ||
+        userData.name ||
+        "",
+      birth_date:
+        $("#birthDate")?.value ||
+        userData.birthDate ||
+        null,
+      gender:
+        $("input[name='gender']:checked")?.value ||
+        null,
+      height_cm:
+        getNumber("#height", 0) || null,
+      weight_kg:
+        getNumber("#weight", 0) || null,
+      goal:
+        $("#goal")?.value ||
+        "maintain",
+      activity_level:
+        $("#activityLevel")?.value ||
+        null
+    };
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("profiles")
+        .upsert(
+          profile,
+          {
+            onConflict: "id"
+          }
+        );
+
+    if (error) {
+      console.error(
+        "Profile save error:",
+        error
+      );
+    }
+  }
+
+  // =======================================================
   // PROFILE FORM
-  // =========================
+  // =======================================================
 
   const profileForm =
     $("#profileForm");
@@ -303,15 +397,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     profileForm.addEventListener(
       "submit",
-      (event) => {
+      async (event) => {
 
         event.preventDefault();
 
         userData.name =
-          $("#name")?.value?.trim() || "";
+          $("#name")?.value?.trim() ||
+          "";
 
         userData.birthDate =
-          $("#birthDate")?.value || "";
+          $("#birthDate")?.value ||
+          "";
 
         userData.weight =
           getNumber("#weight");
@@ -320,25 +416,29 @@ document.addEventListener("DOMContentLoaded", () => {
           getNumber("#height");
 
         userData.goal =
-          $("#goal")?.value || "maintain";
+          $("#goal")?.value ||
+          "maintain";
 
         userData.activity =
-          $("#activityLevel")?.value || "1.375";
+          $("#activityLevel")?.value ||
+          "1.375";
 
         saveLocalData();
 
         updateDashboard();
 
+        await saveProfileToSupabase();
+
         showMessage(
-          "تم حفظ بياناتك وحساب هدفك اليومي بنجاح"
+          "تم حفظ بياناتك بنجاح"
         );
       }
     );
   }
 
-  // =========================
+  // =======================================================
   // AUTO CALCULATION
-  // =========================
+  // =======================================================
 
   [
     "#weight",
@@ -363,9 +463,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-  // =========================
+  // =======================================================
   // FOOD DATABASE
-  // =========================
+  // =======================================================
 
   const foods = {
 
@@ -430,10 +530,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // =========================
-  // FOOD CALCULATOR
-  // =========================
-
   function calculateFood(food, grams) {
 
     if (!food || grams <= 0) {
@@ -443,12 +539,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       calories:
         Math.round(
-          food.calories * grams / 100
+          food.calories *
+          grams /
+          100
         ),
 
       protein:
         Math.round(
-          food.protein * grams / 100
+          food.protein *
+          grams /
+          100
         )
     };
   }
@@ -461,81 +561,207 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       value.includes("فراخ") ||
       value.includes("chicken")
-    ) {
-      return foods.chicken;
-    }
+    ) return foods.chicken;
 
     if (
       value.includes("رز") ||
       value.includes("أرز") ||
       value.includes("rice")
-    ) {
-      return foods.rice;
-    }
+    ) return foods.rice;
 
     if (
       value.includes("بيض") ||
       value.includes("egg")
-    ) {
-      return foods.eggs;
-    }
+    ) return foods.eggs;
 
     if (
       value.includes("شوفان") ||
       value.includes("oat")
-    ) {
-      return foods.oats;
-    }
+    ) return foods.oats;
 
     if (
       value.includes("موز") ||
       value.includes("banana")
-    ) {
-      return foods.banana;
-    }
+    ) return foods.banana;
 
     if (
       value.includes("زبادي") ||
       value.includes("yogurt")
-    ) {
-      return foods.yogurt;
-    }
+    ) return foods.yogurt;
 
     if (
       value.includes("تونة") ||
       value.includes("tuna")
-    ) {
-      return foods.tuna;
-    }
+    ) return foods.tuna;
 
     if (
       value.includes("بطاطس") ||
       value.includes("potato")
-    ) {
-      return foods.potato;
-    }
+    ) return foods.potato;
 
     if (
       value.includes("عيش") ||
       value.includes("خبز") ||
       value.includes("bread")
-    ) {
-      return foods.bread;
-    }
+    ) return foods.bread;
 
     if (
       value.includes("لبن") ||
       value.includes("milk")
-    ) {
-      return foods.milk;
-    }
+    ) return foods.milk;
 
     return null;
   }
 
-  // =========================
-  // MEAL FORM
-  // =========================
+  // =======================================================
+  // GET / CREATE DAILY LOG
+  // =======================================================
+
+  async function getDailyLog() {
+
+    if (!supabaseClient) {
+      return null;
+    }
+
+    const user =
+      currentUser ||
+      await getCurrentUser();
+
+    if (!user) return null;
+
+    const date =
+      todayDate();
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("daily_logs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("log_date", date)
+        .maybeSingle();
+
+    if (error) {
+      console.error(
+        "Daily log error:",
+        error
+      );
+      return null;
+    }
+
+    if (data) {
+      return data;
+    }
+
+    const {
+      data: created,
+      error: createError
+    } =
+      await supabaseClient
+        .from("daily_logs")
+        .insert({
+          user_id: user.id,
+          log_date: date,
+          calories_consumed: 0,
+          protein_consumed: 0,
+          water_ml: 0,
+          calories_burned: 0
+        })
+        .select()
+        .single();
+
+    if (createError) {
+      console.error(
+        "Daily log creation error:",
+        createError
+      );
+      return null;
+    }
+
+    return created;
+  }
+
+  // =======================================================
+  // FOOD LOG
+  // =======================================================
+
+  async function saveFoodToSupabase(
+    food,
+    grams,
+    result
+  ) {
+
+    if (!supabaseClient) return;
+
+    const user =
+      currentUser ||
+      await getCurrentUser();
+
+    if (!user) {
+      showMessage(
+        "سجل الدخول اولا لحفظ البيانات"
+      );
+      return;
+    }
+
+    const dailyLog =
+      await getDailyLog();
+
+    if (!dailyLog) return;
+
+    const {
+      error: foodError
+    } =
+      await supabaseClient
+        .from("food_logs")
+        .insert({
+          user_id: user.id,
+          daily_log_id: dailyLog.id,
+          meal_type: "meal",
+          meal_name: food.name,
+          description:
+            `${grams} جرام`,
+          calories:
+            result.calories,
+          protein_g:
+            result.protein,
+          carbs_g: 0,
+          fat_g: 0,
+          consumed_at:
+            new Date().toISOString()
+        });
+
+    if (foodError) {
+      console.error(
+        "Food log error:",
+        foodError
+      );
+      return;
+    }
+
+    await supabaseClient
+      .from("daily_logs")
+      .update({
+        calories_consumed:
+          Number(
+            dailyLog.calories_consumed || 0
+          ) +
+          result.calories,
+
+        protein_consumed:
+          Number(
+            dailyLog.protein_consumed || 0
+          ) +
+          result.protein
+      })
+      .eq("id", dailyLog.id);
+  }
+
+  // =======================================================
+  // FOOD FORM
+  // =======================================================
 
   const foodForm =
     $("#foodForm");
@@ -544,12 +770,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     foodForm.addEventListener(
       "submit",
-      (event) => {
+      async (event) => {
 
         event.preventDefault();
 
         const foodText =
-          $("#foodName")?.value?.trim() || "";
+          $("#foodName")?.value?.trim() ||
+          "";
 
         const grams =
           getNumber("#foodGrams");
@@ -567,7 +794,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const result =
-          calculateFood(food, grams);
+          calculateFood(
+            food,
+            grams
+          );
 
         if (!result) {
 
@@ -582,12 +812,16 @@ document.addEventListener("DOMContentLoaded", () => {
           userData.today || {};
 
         userData.today.calories =
-          Number(userData.today.calories || 0)
-          + result.calories;
+          Number(
+            userData.today.calories || 0
+          ) +
+          result.calories;
 
         userData.today.protein =
-          Number(userData.today.protein || 0)
-          + result.protein;
+          Number(
+            userData.today.protein || 0
+          ) +
+          result.protein;
 
         userData.today.meals =
           userData.today.meals || [];
@@ -595,12 +829,21 @@ document.addEventListener("DOMContentLoaded", () => {
         userData.today.meals.push({
           food: food.name,
           grams,
-          calories: result.calories,
-          protein: result.protein,
-          time: new Date().toISOString()
+          calories:
+            result.calories,
+          protein:
+            result.protein,
+          time:
+            new Date().toISOString()
         });
 
         saveLocalData();
+
+        await saveFoodToSupabase(
+          food,
+          grams,
+          result
+        );
 
         updateFoodDashboard();
 
@@ -613,9 +856,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // FOOD DASHBOARD
-  // =========================
+  // =======================================================
 
   function updateFoodDashboard() {
 
@@ -641,7 +884,9 @@ document.addEventListener("DOMContentLoaded", () => {
         Math.max(
           0,
           result.calories -
-          Number(today.calories || 0)
+          Number(
+            today.calories || 0
+          )
         );
 
       safeText(
@@ -651,71 +896,187 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // =========================
+  // =======================================================
   // QUICK FOOD BUTTONS
-  // =========================
+  // =======================================================
 
-  $$(".food-btn").forEach((button) => {
+  $$(".food-btn").forEach(
+    (button) => {
 
-    button.addEventListener(
-      "click",
-      () => {
+      button.addEventListener(
+        "click",
+        async () => {
 
-        const foodName =
-          button.dataset.food ||
-          button.textContent;
+          const foodName =
+            button.dataset.food ||
+            button.textContent;
 
-        const food =
-          detectFood(foodName);
+          const food =
+            detectFood(foodName);
 
-        if (!food) return;
+          if (!food) return;
 
-        const grams =
-          Number(
-            button.dataset.grams || 100
+          const grams =
+            Number(
+              button.dataset.grams ||
+              100
+            );
+
+          const result =
+            calculateFood(
+              food,
+              grams
+            );
+
+          if (!result) return;
+
+          userData.today =
+            userData.today || {};
+
+          userData.today.calories =
+            Number(
+              userData.today.calories || 0
+            ) +
+            result.calories;
+
+          userData.today.protein =
+            Number(
+              userData.today.protein || 0
+            ) +
+            result.protein;
+
+          userData.today.meals =
+            userData.today.meals || [];
+
+          userData.today.meals.push({
+            food: food.name,
+            grams,
+            calories:
+              result.calories,
+            protein:
+              result.protein,
+            time:
+              new Date().toISOString()
+          });
+
+          saveLocalData();
+
+          await saveFoodToSupabase(
+            food,
+            grams,
+            result
           );
 
-        const result =
-          calculateFood(food, grams);
+          updateFoodDashboard();
 
-        if (!result) return;
+          showMessage(
+            `تم تسجيل ${food.name}`
+          );
+        }
+      );
+    }
+  );
 
-        userData.today =
-          userData.today || {};
+  // =======================================================
+  // WATER
+  // =======================================================
 
-        userData.today.calories =
-          Number(userData.today.calories || 0)
-          + result.calories;
+  let water =
+    Number(
+      localStorage.getItem(
+        "dr_elorabi_water"
+      ) || 0
+    );
 
-        userData.today.protein =
-          Number(userData.today.protein || 0)
-          + result.protein;
+  async function saveWaterToSupabase(
+    amount
+  ) {
 
-        userData.today.meals =
-          userData.today.meals || [];
+    if (!supabaseClient) return;
 
-        userData.today.meals.push({
-          food: food.name,
-          grams,
-          calories: result.calories,
-          protein: result.protein,
-          time: new Date().toISOString()
-        });
+    const user =
+      currentUser ||
+      await getCurrentUser();
 
-        saveLocalData();
+    if (!user) return;
 
-        updateFoodDashboard();
+    const dailyLog =
+      await getDailyLog();
+
+    if (!dailyLog) return;
+
+    await supabaseClient
+      .from("water_logs")
+      .insert({
+        user_id: user.id,
+        daily_log_id: dailyLog.id,
+        amount_ml: amount,
+        consumed_at:
+          new Date().toISOString()
+      });
+
+    await supabaseClient
+      .from("daily_logs")
+      .update({
+        water_ml:
+          Number(
+            dailyLog.water_ml || 0
+          ) +
+          amount
+      })
+      .eq(
+        "id",
+        dailyLog.id
+      );
+  }
+
+  function updateWater() {
+
+    safeText(
+      "#waterAmount",
+      `${water} ml`
+    );
+
+    safeText(
+      "#waterLiters",
+      `${(
+        water / 1000
+      ).toFixed(1)} L`
+    );
+  }
+
+  const waterBtn =
+    $("#waterBtn");
+
+  if (waterBtn) {
+
+    waterBtn.addEventListener(
+      "click",
+      async () => {
+
+        water += 250;
+
+        localStorage.setItem(
+          "dr_elorabi_water",
+          water
+        );
+
+        await saveWaterToSupabase(
+          250
+        );
+
+        updateWater();
 
         showMessage(
-          `تم تسجيل ${food.name}`
+          "تم تسجيل 250 مل ماء"
         );
       }
     );
-  });
+  }
 
-  // =========================
+  // =======================================================
   // SLEEP
-  // =========================
+  // =======================================================
 
   const sleepStartBtn =
     $("#sleepStartBtn");
@@ -747,7 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sleepEndBtn.addEventListener(
       "click",
-      () => {
+      async () => {
 
         if (!userData.sleepStart) {
 
@@ -763,6 +1124,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveLocalData();
 
+        await saveSleepToSupabase();
+
         updateSleep();
 
         showMessage(
@@ -770,6 +1133,63 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       }
     );
+  }
+
+  async function saveSleepToSupabase() {
+
+    if (!supabaseClient) return;
+
+    const user =
+      currentUser ||
+      await getCurrentUser();
+
+    if (!user) return;
+
+    if (
+      !userData.sleepStart ||
+      !userData.sleepEnd
+    ) {
+      return;
+    }
+
+    const start =
+      new Date(
+        userData.sleepStart
+      );
+
+    const end =
+      new Date(
+        userData.sleepEnd
+      );
+
+    const sleepMinutes =
+      Math.max(
+        0,
+        Math.round(
+          (
+            end - start
+          ) / 60000
+        )
+      );
+
+    const dailyLog =
+      await getDailyLog();
+
+    if (!dailyLog) return;
+
+    await supabaseClient
+      .from("daily_logs")
+      .update({
+        sleep_time:
+          end.toISOString(),
+
+        sleep_minutes:
+          sleepMinutes
+      })
+      .eq(
+        "id",
+        dailyLog.id
+      );
   }
 
   function updateSleep() {
@@ -782,14 +1202,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const start =
-      new Date(userData.sleepStart);
+      new Date(
+        userData.sleepStart
+      );
 
     const end =
-      new Date(userData.sleepEnd);
+      new Date(
+        userData.sleepEnd
+      );
 
     const hours =
-      (end - start) /
-      (1000 * 60 * 60);
+      (
+        end - start
+      ) /
+      (
+        1000 * 60 * 60
+      );
 
     if (hours >= 0) {
 
@@ -800,58 +1228,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // =========================
-  // WATER
-  // =========================
-
-  let water =
-    Number(
-      localStorage.getItem(
-        "dr_elorabi_water"
-      ) || 0
-    );
-
-  function updateWater() {
-
-    safeText(
-      "#waterAmount",
-      `${water} ml`
-    );
-
-    safeText(
-      "#waterLiters",
-      `${(water / 1000).toFixed(1)} L`
-    );
-  }
-
-  const waterBtn =
-    $("#waterBtn");
-
-  if (waterBtn) {
-
-    waterBtn.addEventListener(
-      "click",
-      () => {
-
-        water += 250;
-
-        localStorage.setItem(
-          "dr_elorabi_water",
-          water
-        );
-
-        updateWater();
-
-        showMessage(
-          "تم تسجيل 250 مل ماء"
-        );
-      }
-    );
-  }
-
-  // =========================
+  // =======================================================
   // STEPS
-  // =========================
+  // =======================================================
 
   const stepsInput =
     $("#stepsInput");
@@ -871,7 +1250,10 @@ document.addEventListener("DOMContentLoaded", () => {
           );
 
         userData.steps =
-          Math.max(0, steps);
+          Math.max(
+            0,
+            steps
+          );
 
         saveLocalData();
 
@@ -887,42 +1269,78 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // WORKOUT
-  // =========================
+  // =======================================================
 
-  $$(".workout-btn").forEach((button) => {
+  $$(".workout-btn").forEach(
+    (button) => {
 
-    button.addEventListener(
-      "click",
-      () => {
+      button.addEventListener(
+        "click",
+        async () => {
 
-        const workout =
-          button.dataset.workout ||
-          button.textContent;
+          const workout =
+            button.dataset.workout ||
+            button.textContent;
 
-        userData.workouts =
-          userData.workouts || [];
+          userData.workouts =
+            userData.workouts || [];
 
-        userData.workouts.push({
-          name: workout,
-          time: new Date().toISOString()
-        });
+          userData.workouts.push({
+            name: workout,
+            time:
+              new Date().toISOString()
+          });
 
-        saveLocalData();
+          saveLocalData();
 
-        showMessage(
-          `تم تسجيل تمرين: ${workout}`
-        );
-      }
-    );
-  });
+          if (supabaseClient) {
 
-  // =========================
+            const user =
+              currentUser ||
+              await getCurrentUser();
+
+            if (user) {
+
+              const dailyLog =
+                await getDailyLog();
+
+              if (dailyLog) {
+
+                await supabaseClient
+                  .from("exercise_logs")
+                  .insert({
+                    user_id:
+                      user.id,
+                    daily_log_id:
+                      dailyLog.id,
+                    exercise_name:
+                      workout,
+                    duration_minutes:
+                      0,
+                    calories_burned:
+                      0,
+                    started_at:
+                      new Date().toISOString()
+                  });
+              }
+            }
+          }
+
+          showMessage(
+            `تم تسجيل تمرين: ${workout}`
+          );
+        }
+      );
+    }
+  );
+
+  // =======================================================
   // DAILY PLAN
-  // =========================
+  // =======================================================
 
-  function createDailyPlan() {
+  async function createDailyPlan() {
 
     const result =
       calculateCalories();
@@ -940,19 +1358,29 @@ document.addEventListener("DOMContentLoaded", () => {
       result.calories;
 
     const breakfast =
-      Math.round(calories * 0.25);
+      Math.round(
+        calories * 0.25
+      );
 
     const lunch =
-      Math.round(calories * 0.35);
+      Math.round(
+        calories * 0.35
+      );
 
     const dinner =
-      Math.round(calories * 0.25);
+      Math.round(
+        calories * 0.25
+      );
 
     const dessert =
-      Math.round(calories * 0.10);
+      Math.round(
+        calories * 0.10
+      );
 
     const snack =
-      Math.round(calories * 0.05);
+      Math.round(
+        calories * 0.05
+      );
 
     const plan = {
       breakfast,
@@ -960,7 +1388,8 @@ document.addEventListener("DOMContentLoaded", () => {
       dinner,
       dessert,
       snack,
-      protein: result.protein
+      protein:
+        result.protein
     };
 
     userData.dailyPlan =
@@ -993,8 +1422,48 @@ document.addEventListener("DOMContentLoaded", () => {
       `${snack} kcal`
     );
 
+    // Save main daily plan to Supabase
+    if (supabaseClient) {
+
+      const user =
+        currentUser ||
+        await getCurrentUser();
+
+      if (user) {
+
+        await supabaseClient
+          .from("daily_plans")
+          .insert([
+            {
+              user_id:
+                user.id,
+              plan_date:
+                todayDate(),
+              meal_type:
+                "daily_plan",
+              meal_name:
+                "خطة اليوم",
+              ingredients:
+                "",
+              instructions:
+                "خطة غذائية محسوبة حسب احتياجات المستخدم",
+              calories:
+                calories,
+              protein_g:
+                result.protein,
+              carbs_g:
+                0,
+              fat_g:
+                0,
+              completed:
+                false
+            }
+          ]);
+      }
+    }
+
     showMessage(
-      "تم إنشاء خطة اليوم"
+      "تم إنشاء خطة اليوم وحفظها"
     );
   }
 
@@ -1009,9 +1478,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // BODY PROGRESS
-  // =========================
+  // =======================================================
 
   const progressForm =
     $("#progressForm");
@@ -1020,12 +1489,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     progressForm.addEventListener(
       "submit",
-      (event) => {
+      async (event) => {
 
         event.preventDefault();
 
         const weight =
-          getNumber("#progressWeight");
+          getNumber(
+            "#progressWeight"
+          );
 
         if (weight <= 0) {
 
@@ -1041,10 +1512,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
         userData.progress.push({
           weight,
-          date: new Date().toISOString()
+          date:
+            new Date().toISOString()
         });
 
         saveLocalData();
+
+        if (supabaseClient) {
+
+          const user =
+            currentUser ||
+            await getCurrentUser();
+
+          if (user) {
+
+            const data = {
+              user_id:
+                user.id,
+              weight_kg:
+                weight,
+              waist_cm:
+                getNumber(
+                  "#waist"
+                ) || null,
+              chest_cm:
+                getNumber(
+                  "#chest"
+                ) || null,
+              arm_cm:
+                getNumber(
+                  "#arm"
+                ) || null,
+              thigh_cm:
+                getNumber(
+                  "#thigh"
+                ) || null,
+              body_fat_percent:
+                getNumber(
+                  "#bodyFat"
+                ) || null,
+              notes:
+                $("#progressNotes")
+                  ?.value ||
+                null,
+              recorded_at:
+                new Date().toISOString()
+            };
+
+            const {
+              error
+            } =
+              await supabaseClient
+                .from("progress_logs")
+                .insert(data);
+
+            if (error) {
+              console.error(
+                "Progress error:",
+                error
+              );
+            }
+          }
+        }
 
         showMessage(
           "تم تسجيل تقدمك"
@@ -1053,9 +1582,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
-  // PHOTO PROGRESS
-  // =========================
+  // =======================================================
+  // PROGRESS PHOTO
+  // =======================================================
 
   const photoInput =
     $("#progressPhoto");
@@ -1103,9 +1632,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // PRO REQUEST
-  // =========================
+  // =======================================================
 
   const requestProBtn =
     $("#requestProBtn");
@@ -1126,7 +1655,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const message =
           `أهلا ${name}،\n\n` +
-          `لتفعيل dr.elorabi PRO التجريبي، ` +
+          `لتفعيل dr.elorabi PRO، ` +
           `ادفع الاشتراك ثم احتفظ بصورة التحويل.\n\n` +
           `قيمة الاشتراك: 50 جنيه\n\n` +
           `بعد التحويل اضغط تأكيد الدفع.`;
@@ -1156,6 +1685,39 @@ document.addEventListener("DOMContentLoaded", () => {
             "inline-block";
         }
 
+        if (supabaseClient) {
+
+          const user =
+            currentUser ||
+            await getCurrentUser();
+
+          if (user) {
+
+            const {
+              error
+            } =
+              await supabaseClient
+                .from("payment_requests")
+                .insert({
+                  user_id:
+                    user.id,
+                  amount:
+                    50,
+                  payment_method:
+                    "instapay",
+                  status:
+                    "pending"
+                });
+
+            if (error) {
+              console.error(
+                "Payment request error:",
+                error
+              );
+            }
+          }
+        }
+
         showMessage(
           "تم تجهيز طلب تفعيل PRO"
         );
@@ -1163,9 +1725,9 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // PAYMENT CONFIRMATION
-  // =========================
+  // =======================================================
 
   const confirmPaymentBtn =
     $("#confirmPaymentBtn");
@@ -1184,6 +1746,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         saveLocalData();
 
+        if (supabaseClient) {
+
+          const user =
+            currentUser ||
+            await getCurrentUser();
+
+          if (user) {
+
+            const {
+              error
+            } =
+              await supabaseClient
+                .from("payment_requests")
+                .insert({
+                  user_id:
+                    user.id,
+                  amount:
+                    50,
+                  payment_method:
+                    "instapay",
+                  status:
+                    "pending"
+                });
+
+            if (error) {
+              console.error(
+                error
+              );
+            }
+          }
+        }
+
         safeText(
           "#proMessage",
           "تم إرسال طلب الدفع للمراجعة. التفعيل النهائي يحتاج تأكيد الدفع من الإدارة."
@@ -1192,25 +1786,21 @@ document.addEventListener("DOMContentLoaded", () => {
         showMessage(
           "تم إرسال طلب تفعيل PRO"
         );
-
-        /*
-          ملاحظة:
-          هنا لا يتم اعتبار التحويل مؤكدا تلقائيا.
-          في النسخة الرسمية يجب استخدام Backend
-          للتحقق من الدفع قبل تفعيل PRO.
-        */
       }
     );
   }
 
-  // =========================
-  // SUPABASE AUTH
-  // =========================
+  // =======================================================
+  // SIGN UP
+  // =======================================================
 
   const signupForm =
     $("#signupForm");
 
-  if (signupForm && supabaseClient) {
+  if (
+    signupForm &&
+    supabaseClient
+  ) {
 
     signupForm.addEventListener(
       "submit",
@@ -1219,12 +1809,18 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         const email =
-          $("#signupEmail")?.value?.trim();
+          $("#signupEmail")
+            ?.value
+            ?.trim();
 
         const password =
-          $("#signupPassword")?.value;
+          $("#signupPassword")
+            ?.value;
 
-        if (!email || !password) {
+        if (
+          !email ||
+          !password
+        ) {
 
           showMessage(
             "اكتب البريد وكلمة المرور"
@@ -1236,10 +1832,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const {
           error
         } =
-          await supabaseClient.auth.signUp({
-            email,
-            password
-          });
+          await supabaseClient.auth
+            .signUp({
+              email,
+              password
+            });
 
         if (error) {
 
@@ -1259,14 +1856,17 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
+  // =======================================================
   // LOGIN
-  // =========================
+  // =======================================================
 
   const loginForm =
     $("#loginForm");
 
-  if (loginForm && supabaseClient) {
+  if (
+    loginForm &&
+    supabaseClient
+  ) {
 
     loginForm.addEventListener(
       "submit",
@@ -1275,12 +1875,18 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         const email =
-          $("#loginEmail")?.value?.trim();
+          $("#loginEmail")
+            ?.value
+            ?.trim();
 
         const password =
-          $("#loginPassword")?.value;
+          $("#loginPassword")
+            ?.value;
 
-        if (!email || !password) {
+        if (
+          !email ||
+          !password
+        ) {
 
           showMessage(
             "اكتب البريد وكلمة المرور"
@@ -1292,10 +1898,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const {
           error
         } =
-          await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-          });
+          await supabaseClient.auth
+            .signInWithPassword({
+              email,
+              password
+            });
 
         if (error) {
 
@@ -1308,23 +1915,28 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        await getCurrentUser();
+
+        await loadCurrentUser();
+
         showMessage(
           "تم تسجيل الدخول بنجاح"
         );
-
-        await loadCurrentUser();
       }
     );
   }
 
-  // =========================
+  // =======================================================
   // LOGOUT
-  // =========================
+  // =======================================================
 
   const logoutBtn =
     $("#logoutBtn");
 
-  if (logoutBtn && supabaseClient) {
+  if (
+    logoutBtn &&
+    supabaseClient
+  ) {
 
     logoutBtn.addEventListener(
       "click",
@@ -1333,7 +1945,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const {
           error
         } =
-          await supabaseClient.auth.signOut();
+          await supabaseClient.auth
+            .signOut();
 
         if (error) {
 
@@ -1344,6 +1957,9 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
+        currentUser =
+          null;
+
         showMessage(
           "تم تسجيل الخروج"
         );
@@ -1351,43 +1967,134 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // =========================
-  // CURRENT USER
-  // =========================
+  // =======================================================
+  // LOAD PROFILE
+  // =======================================================
 
-  async function loadCurrentUser() {
+  async function loadProfile() {
 
     if (!supabaseClient) return;
 
-    try {
+    const user =
+      currentUser ||
+      await getCurrentUser();
 
-      const {
-        data
-      } =
-        await supabaseClient.auth.getUser();
+    if (!user) return;
 
-      const user =
-        data?.user;
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
 
-      if (!user) return;
-
-      safeText(
-        "#userEmail",
-        user.email || ""
-      );
-
-    } catch (error) {
-
+    if (error) {
       console.error(
-        "User loading error:",
+        "Profile loading error:",
         error
       );
+      return;
     }
+
+    if (!data) return;
+
+    if (data.full_name) {
+
+      userData.name =
+        data.full_name;
+
+      if ($("#name")) {
+        $("#name").value =
+          data.full_name;
+      }
+    }
+
+    if (data.birth_date) {
+
+      userData.birthDate =
+        data.birth_date;
+
+      if ($("#birthDate")) {
+        $("#birthDate").value =
+          data.birth_date;
+      }
+    }
+
+    if (data.height_cm) {
+
+      userData.height =
+        data.height_cm;
+
+      if ($("#height")) {
+        $("#height").value =
+          data.height_cm;
+      }
+    }
+
+    if (data.weight_kg) {
+
+      userData.weight =
+        data.weight_kg;
+
+      if ($("#weight")) {
+        $("#weight").value =
+          data.weight_kg;
+      }
+    }
+
+    if (data.goal) {
+
+      userData.goal =
+        data.goal;
+
+      if ($("#goal")) {
+        $("#goal").value =
+          data.goal;
+      }
+    }
+
+    if (data.activity_level) {
+
+      userData.activity =
+        data.activity_level;
+
+      if ($("#activityLevel")) {
+        $("#activityLevel").value =
+          data.activity_level;
+      }
+    }
+
+    saveLocalData();
+
+    updateDashboard();
   }
 
-  // =========================
+  // =======================================================
+  // CURRENT USER DISPLAY
+  // =======================================================
+
+  async function loadCurrentUser() {
+
+    const user =
+      currentUser ||
+      await getCurrentUser();
+
+    if (!user) return;
+
+    safeText(
+      "#userEmail",
+      user.email || ""
+    );
+
+    await loadProfile();
+  }
+
+  // =======================================================
   // REALTIME CLOCK
-  // =========================
+  // =======================================================
 
   function updateClock() {
 
@@ -1431,9 +2138,9 @@ document.addEventListener("DOMContentLoaded", () => {
     1000
   );
 
-  // =========================
+  // =======================================================
   // MEAL TIMER
-  // =========================
+  // =======================================================
 
   function getNextMealTime() {
 
@@ -1481,80 +2188,62 @@ document.addEventListener("DOMContentLoaded", () => {
         getNextMealTime();
 
         showMessage(
-          "تم تسجيل وقت الاستيقاظ وبدأ حساب يومك من دلوقتي"
+          "تم تسجيل وقت الاستيقاظ وبدأ حساب يومك"
         );
       }
     );
   }
 
-  // =========================
-  // INITIAL LOAD
-  // =========================
+  // =======================================================
+  // LOAD SAVED LOCAL DATA
+  // =======================================================
 
   function loadSavedData() {
 
     if (userData.name) {
 
-      const name =
-        $("#name");
-
-      if (name) {
-        name.value =
+      if ($("#name")) {
+        $("#name").value =
           userData.name;
       }
     }
 
     if (userData.birthDate) {
 
-      const birth =
-        $("#birthDate");
-
-      if (birth) {
-        birth.value =
+      if ($("#birthDate")) {
+        $("#birthDate").value =
           userData.birthDate;
       }
     }
 
     if (userData.weight) {
 
-      const weight =
-        $("#weight");
-
-      if (weight) {
-        weight.value =
+      if ($("#weight")) {
+        $("#weight").value =
           userData.weight;
       }
     }
 
     if (userData.height) {
 
-      const height =
-        $("#height");
-
-      if (height) {
-        height.value =
+      if ($("#height")) {
+        $("#height").value =
           userData.height;
       }
     }
 
     if (userData.goal) {
 
-      const goal =
-        $("#goal");
-
-      if (goal) {
-        goal.value =
+      if ($("#goal")) {
+        $("#goal").value =
           userData.goal;
       }
     }
 
     if (userData.activity) {
 
-      const activity =
-        $("#activityLevel");
-
-      if (activity) {
-        activity.value =
+      if ($("#activityLevel")) {
+        $("#activityLevel").value =
           userData.activity;
       }
     }
@@ -1595,12 +2284,42 @@ document.addEventListener("DOMContentLoaded", () => {
     updateClock();
   }
 
+  // =======================================================
+  // AUTH STATE
+  // =======================================================
+
+  if (supabaseClient) {
+
+    supabaseClient.auth
+      .onAuthStateChange(
+        async (
+          event,
+          session
+        ) => {
+
+          currentUser =
+            session?.user || null;
+
+          if (currentUser) {
+            await loadCurrentUser();
+          }
+        }
+      );
+  }
+
+  // =======================================================
+  // START
+  // =======================================================
+
   loadSavedData();
 
-  loadCurrentUser();
+  getCurrentUser()
+    .then(() => {
+      loadCurrentUser();
+    });
 
   console.log(
-    "dr.elorabi application loaded successfully."
+    "dr.elorabi Supabase application loaded successfully."
   );
 
 });
