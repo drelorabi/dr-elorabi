@@ -1,1833 +1,2051 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // =========================================================
-  // SUPABASE
-  // =========================================================
+/* =====================================================
+SUPABASE
+===================================================== */
 
-  const SUPABASE_URL =
-    "https://cwnjzwmficiuoybimqsc.supabase.co";
+const SUPABASE_URL =
+"https://cwnjzwmficiuoybimqsc.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_HYnTEROkcBw7lrIKKNl21A_fmi1TsQV";
+const SUPABASE_KEY =
+"sb_publishable_HYnTEROkcBw7lrIKKNl21A_fmi1TsQV";
 
-  const ADMIN_EMAIL =
-    "fhddhd3gc@gmail.com";
+let supabaseClient = null;
 
-  const PAYMENT_URL =
-    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
+if (window.supabase) {
 
-  let supabaseClient = null;
+```
+try {
 
-  if (window.supabase) {
-    try {
-      supabaseClient =
-        window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_KEY
-        );
-    } catch (error) {
-      console.error(
-        "Supabase initialization error:",
-        error
-      );
-    }
-  }
-
-
-  // =========================================================
-  // HELPERS
-  // =========================================================
-
-  const $ = (selector) =>
-    document.querySelector(selector);
-
-  const $$ = (selector) =>
-    Array.from(
-      document.querySelectorAll(selector)
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
     );
 
-
-  function safeText(selector, value) {
-
-    const element = $(selector);
-
-    if (element) {
-      element.textContent = value;
-    }
-
-  }
-
-
-  function getNumber(
-    selector,
-    fallback = 0
-  ) {
-
-    const element = $(selector);
-
-    if (!element) {
-      return fallback;
-    }
-
-    const value =
-      Number(element.value);
-
-    return Number.isFinite(value)
-      ? value
-      : fallback;
-
-  }
-
-
-  function showMessage(
-    message,
-    type = "info"
-  ) {
-
-    let box =
-      $("#appMessage");
-
-    if (!box) {
-
-      box =
-        document.createElement(
-          "div"
-        );
-
-      box.id =
-        "appMessage";
-
-      Object.assign(
-        box.style,
-        {
-          position: "fixed",
-          bottom: "20px",
-          left: "20px",
-          right: "20px",
-          zIndex: "99999",
-          padding: "15px",
-          borderRadius: "14px",
-          background: "#111827",
-          color: "#fff",
-          textAlign: "center",
-          fontWeight: "700",
-          boxShadow:
-            "0 10px 30px rgba(0,0,0,.25)"
-        }
-      );
-
-      document.body.appendChild(
-        box
-      );
-
-    }
-
-    box.textContent =
-      message;
-
-    box.style.background =
-      type === "error"
-        ? "#b91c1c"
-        : type === "success"
-        ? "#15803d"
-        : "#111827";
-
-    clearTimeout(
-      box._timer
-    );
-
-    box._timer =
-      setTimeout(() => {
-
-        if (box) {
-          box.remove();
-        }
-
-      }, 4000);
-
-  }
-
-
-  function showScreen(id) {
-
-    $$(".screen").forEach(
-      (screen) => {
-
-        screen.classList.add(
-          "hidden"
-        );
-
-      }
-    );
-
-    const screen =
-      $(`#${id}`);
-
-    if (screen) {
-      screen.classList.remove(
-        "hidden"
-      );
-    }
-
-  }
-
-
-  function todayKey() {
-
-    const now =
-      new Date();
-
-    const year =
-      now.getFullYear();
-
-    const month =
-      String(
-        now.getMonth() + 1
-      ).padStart(2, "0");
-
-    const day =
-      String(
-        now.getDate()
-      ).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-
-  }
-
-
-  function escapeHTML(text) {
-
-    return String(text ?? "")
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
-
-  }
-
-
-  // =========================================================
-  // LOCAL DATA
-  // =========================================================
-
-  const STORAGE_KEY =
-    "dr_elorabi_user";
-
-  let userData = {};
-
-  try {
-
-    userData =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_KEY
-        ) || "{}"
-      );
-
-  } catch {
-
-    userData = {};
-
-  }
-
-
-  function saveLocalData() {
-
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(
-        userData
-      )
-    );
-
-  }
-
-
-  // =========================================================
-  // AGE
-  // =========================================================
-
-  function calculateAge(
-    dateString
-  ) {
-
-    if (!dateString) {
-      return 0;
-    }
-
-    const birth =
-      new Date(
-        dateString
-      );
-
-    if (
-      Number.isNaN(
-        birth.getTime()
-      )
-    ) {
-      return 0;
-    }
-
-    const today =
-      new Date();
-
-    let age =
-      today.getFullYear() -
-      birth.getFullYear();
-
-    const month =
-      today.getMonth() -
-      birth.getMonth();
-
-    if (
-      month < 0 ||
-      (
-        month === 0 &&
-        today.getDate() <
-          birth.getDate()
-      )
-    ) {
-      age--;
-    }
-
-    return Math.max(
-      0,
-      age
-    );
-
-  }
-
-
-  // =========================================================
-  // BMI
-  // =========================================================
-
-  function calculateBMI() {
-
-    const weight =
-      userData.weight ||
-      getNumber(
-        "#weight"
-      );
-
-    const height =
-      userData.height ||
-      getNumber(
-        "#height"
-      );
-
-    if (
-      weight <= 0 ||
-      height <= 0
-    ) {
-      return 0;
-    }
-
-    const heightMeters =
-      height / 100;
-
-    return (
-      weight /
-      (
-        heightMeters *
-        heightMeters
-      )
-    );
-
-  }
-
-
-  function bmiStatus(bmi) {
-
-    if (bmi < 18.5) {
-      return "نقص وزن";
-    }
-
-    if (bmi < 25) {
-      return "طبيعي";
-    }
-
-    if (bmi < 30) {
-      return "زيادة وزن";
-    }
-
-    return "سمنة";
-
-  }
-
-
-  // =========================================================
-  // CALORIES
-  // =========================================================
-
-  function getActivityMultiplier() {
-
-    const activity =
-      userData.activity ||
-      $("#activity")?.value;
-
-    const values = {
-
-      sedentary: 1.2,
-
-      light: 1.375,
-
-      moderate: 1.55,
-
-      high: 1.725
-
-    };
-
-    return (
-      values[activity] ||
-      1.2
-    );
-
-  }
-
-
-  function calculateCalories() {
-
-    const weight =
-      userData.weight ||
-      getNumber(
-        "#weight"
-      );
-
-    const height =
-      userData.height ||
-      getNumber(
-        "#height"
-      );
-
-    const birthDate =
-      userData.birthDate ||
-      $("#birthDate")?.value ||
-      "";
-
-    const gender =
-      userData.gender ||
-      $("#gender")?.value ||
-      "male";
-
-    const goal =
-      userData.goal ||
-      $("#goal")?.value ||
-      "maintenance";
-
-    const age =
-      calculateAge(
-        birthDate
-      );
-
-    if (
-      weight <= 0 ||
-      height <= 0 ||
-      age <= 0
-    ) {
-      return null;
-    }
-
-    let bmr;
-
-    if (
-      gender === "female"
-    ) {
-
-      bmr =
-        (10 * weight) +
-        (6.25 * height) -
-        (5 * age) -
-        161;
-
-    } else {
-
-      bmr =
-        (10 * weight) +
-        (6.25 * height) -
-        (5 * age) +
-        5;
-
-    }
-
-    const maintenance =
-      bmr *
-      getActivityMultiplier();
-
-    let calories =
-      maintenance;
-
-    if (
-      goal === "fat_loss"
-    ) {
-
-      calories =
-        maintenance - 400;
-
-    }
-
-    if (
-      goal === "muscle_gain"
-    ) {
-
-      calories =
-        maintenance + 250;
-
-    }
-
-    if (
-      goal === "recomposition"
-    ) {
-
-      calories =
-        maintenance - 150;
-
-    }
-
-    calories =
-      Math.max(
-        1200,
-        calories
-      );
-
-    const protein =
-      Math.round(
-        weight * 1.8
-      );
-
-    const water =
-      Math.round(
-        weight * 35
-      );
-
-    return {
-
-      age,
-
-      bmr:
-        Math.round(
-          bmr
-        ),
-
-      maintenance:
-        Math.round(
-          maintenance
-        ),
-
-      calories:
-        Math.round(
-          calories
-        ),
-
-      protein,
-
-      water
-
-    };
-
-  }
-
-
-  // =========================================================
-  // DAILY DATA
-  // =========================================================
-
-  function getTodayData() {
-
-    const key =
-      todayKey();
-
-    if (!userData.daily) {
-      userData.daily = {};
-    }
-
-    if (
-      !userData.daily[key]
-    ) {
-
-      userData.daily[key] = {
-
-        calories: 0,
-
-        protein: 0,
-
-        water: 0,
-
-        meals: [],
-
-        exercises: [],
-
-        sleep: null
-
-      };
-
-    }
-
-    return userData.daily[key];
-
-  }
-
-
-  // =========================================================
-  // DASHBOARD
-  // =========================================================
-
-  function updateDashboard() {
-
-    const result =
-      calculateCalories();
-
-    if (!result) {
-      return;
-    }
-
-    const today =
-      getTodayData();
-
-    safeText(
-      "#calorieTarget",
-      result.calories
-    );
-
-    safeText(
-      "#proteinTarget",
-      result.protein
-    );
-
-    safeText(
-      "#waterTarget",
-      result.water
-    );
-
-    safeText(
-      "#caloriesConsumed",
-      today.calories
-    );
-
-    safeText(
-      "#caloriesGoal",
-      result.calories
-    );
-
-    safeText(
-      "#proteinConsumed",
-      today.protein
-    );
-
-    safeText(
-      "#proteinGoal",
-      result.protein
-    );
-
-    safeText(
-      "#waterConsumed",
-      today.water
-    );
-
-    const bmi =
-      calculateBMI();
-
-    if (bmi > 0) {
-
-      safeText(
-        "#bmiValue",
-        bmi.toFixed(1)
-      );
-
-      safeText(
-        "#bmiStatus",
-        bmiStatus(bmi)
-      );
-
-    }
-
-    const caloriePercent =
-      Math.min(
-        100,
-        (
-          today.calories /
-          result.calories
-        ) * 100
-      );
-
-    const proteinPercent =
-      Math.min(
-        100,
-        (
-          today.protein /
-          result.protein
-        ) * 100
-      );
-
-    const calorieBar =
-      $("#calorieProgress");
-
-    const proteinBar =
-      $("#proteinProgress");
-
-    if (calorieBar) {
-
-      calorieBar.style.width =
-        `${caloriePercent}%`;
-
-    }
-
-    if (proteinBar) {
-
-      proteinBar.style.width =
-        `${proteinPercent}%`;
-
-    }
-
-    renderFoodList();
-
-    saveLocalData();
-
-  }
-
-
-  // =========================================================
-  // PROFILE
-  // =========================================================
-
-  const profileForm =
-    $("#profileForm");
-
-  if (profileForm) {
-
-    profileForm.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        const name =
-          $("#fullName")
-            ?.value
-            .trim();
-
-        const birthDate =
-          $("#birthDate")
-            ?.value;
-
-        const gender =
-          $("#gender")
-            ?.value;
-
-        const height =
-          getNumber(
-            "#height"
-          );
-
-        const weight =
-          getNumber(
-            "#weight"
-          );
-
-        const goal =
-          $("#goal")
-            ?.value;
-
-        const activity =
-          $("#activity")
-            ?.value;
-
-        const likedFoods =
-          $("#likedFoods")
-            ?.value
-            .trim();
-
-        const dislikedFoods =
-          $("#dislikedFoods")
-            ?.value
-            .trim();
-
-        const allergies =
-          $("#allergies")
-            ?.value
-            .trim();
-
-        const mealsPerDay =
-          Number(
-            $(
-              "#mealsPerDay"
-            )?.value || 4
-          );
-
-        if (
-          !name ||
-          !birthDate ||
-          !gender ||
-          !height ||
-          !weight ||
-          !goal ||
-          !activity
-        ) {
-
-          showMessage(
-            "اكمل كل البيانات المطلوبة",
-            "error"
-          );
-
-          return;
-
-        }
-
-        userData.name =
-          name;
-
-        userData.birthDate =
-          birthDate;
-
-        userData.gender =
-          gender;
-
-        userData.height =
-          height;
-
-        userData.weight =
-          weight;
-
-        userData.goal =
-          goal;
-
-        userData.activity =
-          activity;
-
-        userData.likedFoods =
-          likedFoods;
-
-        userData.dislikedFoods =
-          dislikedFoods;
-
-        userData.allergies =
-          allergies;
-
-        userData.mealsPerDay =
-          mealsPerDay;
-
-        userData.profileCompleted =
-          true;
-
-        saveLocalData();
-
-        await saveProfileToSupabase();
-
-        showDashboard();
-
-        showMessage(
-          "تم حفظ بياناتك وبناء خطتك بنجاح",
-          "success"
-        );
-
-      }
-    );
-
-  }
-
-
-  // =========================================================
-  // SAVE PROFILE
-  // =========================================================
-
-  async function saveProfileToSupabase() {
-
-    if (!supabaseClient) {
-      return;
-    }
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth
-          .getUser();
-
-      if (error) {
-        console.warn(error);
-        return;
-      }
-
-      const user =
-        data?.user;
-
-      if (!user) {
-        return;
-      }
-
-      const profile = {
-
-        id:
-          user.id,
-
-        email:
-          user.email,
-
-        full_name:
-          userData.name,
-
-        birth_date:
-          userData.birthDate,
-
-        gender:
-          userData.gender,
-
-        height:
-          userData.height,
-
-        weight:
-          userData.weight,
-
-        goal:
-          userData.goal,
-
-        activity:
-          userData.activity,
-
-        liked_foods:
-          userData.likedFoods,
-
-        disliked_foods:
-          userData.dislikedFoods,
-
-        allergies:
-          userData.allergies,
-
-        meals_per_day:
-          userData.mealsPerDay
-
-      };
-
-      const result =
-        await supabaseClient
-          .from("profiles")
-          .upsert(
-            profile
-          );
-
-      if (result.error) {
-
-        console.warn(
-          "Profile save:",
-          result.error
-        );
-
-      }
-
-    } catch (error) {
-
-      console.warn(
-        "Profile save error:",
-        error
-      );
-
-    }
-
-  }
-
-
-  // =========================================================
-  // SHOW DASHBOARD
-  // =========================================================
-
-  function showDashboard() {
-
-    showScreen(
-      "dashboardScreen"
-    );
-
-    safeText(
-      "#welcomeName",
-      userData.name ||
-      "اهلا بيك"
-    );
-
-    updateDashboard();
-
-    updateDate();
-
-    if (
-      userData.isAdmin
-    ) {
-
-      $("#adminBtn")
-        ?.classList.remove(
-          "hidden"
-        );
-
-    }
-
-  }
-
-
-  function showProfile() {
-
-    showScreen(
-      "profileScreen"
-    );
-
-    loadProfileInputs();
-
-  }
-
-
-  function loadProfileInputs() {
-
-    if (userData.name) {
-      $("#fullName").value =
-        userData.name;
-    }
-
-    if (userData.birthDate) {
-      $("#birthDate").value =
-        userData.birthDate;
-    }
-
-    if (userData.gender) {
-      $("#gender").value =
-        userData.gender;
-    }
-
-    if (userData.height) {
-      $("#height").value =
-        userData.height;
-    }
-
-    if (userData.weight) {
-      $("#weight").value =
-        userData.weight;
-    }
-
-    if (userData.goal) {
-      $("#goal").value =
-        userData.goal;
-    }
-
-    if (userData.activity) {
-      $("#activity").value =
-        userData.activity;
-    }
-
-    if (userData.likedFoods) {
-      $("#likedFoods").value =
-        userData.likedFoods;
-    }
-
-    if (userData.dislikedFoods) {
-      $("#dislikedFoods").value =
-        userData.dislikedFoods;
-    }
-
-    if (userData.allergies) {
-      $("#allergies").value =
-        userData.allergies;
-    }
-
-    if (userData.mealsPerDay) {
-      $("#mealsPerDay").value =
-        userData.mealsPerDay;
-    }
-
-  }
-
-
-  // =========================================================
-  // FOOD DATABASE
-  // =========================================================
-
-  const foods = {
-
-    chicken: {
-      name: "صدر فراخ مشوي",
-      calories: 165,
-      protein: 31
-    },
-
-    rice: {
-      name: "أرز مطبوخ",
-      calories: 130,
-      protein: 2.7
-    },
-
-    eggs: {
-      name: "بيض",
-      calories: 143,
-      protein: 12.6
-    },
-
-    oats: {
-      name: "شوفان",
-      calories: 389,
-      protein: 16.9
-    },
-
-    banana: {
-      name: "موز",
-      calories: 89,
-      protein: 1.1
-    },
-
-    yogurt: {
-      name: "زبادي",
-      calories: 61,
-      protein: 3.5
-    },
-
-    tuna: {
-      name: "تونة",
-      calories: 132,
-      protein: 28
-    },
-
-    potato: {
-      name: "بطاطس",
-      calories: 77,
-      protein: 2
-    },
-
-    bread: {
-      name: "خبز",
-      calories: 265,
-      protein: 9
-    },
-
-    milk: {
-      name: "لبن",
-      calories: 61,
-      protein: 3.2
-    },
-
-    pasta: {
-      name: "مكرونة مطبوخة",
-      calories: 157,
-      protein: 5.8
-    },
-
-    beef: {
-      name: "لحم بقري",
-      calories: 250,
-      protein: 26
-    },
-
-    cheese: {
-      name: "جبنة",
-      calories: 350,
-      protein: 25
-    }
-
-  };
-
-
-  function detectFood(text) {
-
-    const value =
-      String(text)
-        .toLowerCase()
-        .trim();
-
-    if (
-      value.includes("فراخ") ||
-      value.includes("دجاج") ||
-      value.includes("chicken")
-    ) {
-      return foods.chicken;
-    }
-
-    if (
-      value.includes("رز") ||
-      value.includes("أرز") ||
-      value.includes("rice")
-    ) {
-      return foods.rice;
-    }
-
-    if (
-      value.includes("بيض") ||
-      value.includes("egg")
-    ) {
-      return foods.eggs;
-    }
-
-    if (
-      value.includes("شوفان") ||
-      value.includes("oat")
-    ) {
-      return foods.oats;
-    }
-
-    if (
-      value.includes("موز") ||
-      value.includes("banana")
-    ) {
-      return foods.banana;
-    }
-
-    if (
-      value.includes("زبادي") ||
-      value.includes("yogurt")
-    ) {
-      return foods.yogurt;
-    }
-
-    if (
-      value.includes("تونة") ||
-      value.includes("tuna")
-    ) {
-      return foods.tuna;
-    }
-
-    if (
-      value.includes("بطاطس") ||
-      value.includes("potato")
-    ) {
-      return foods.potato;
-    }
-
-    if (
-      value.includes("عيش") ||
-      value.includes("خبز") ||
-      value.includes("bread")
-    ) {
-      return foods.bread;
-    }
-
-    if (
-      value.includes("لبن") ||
-      value.includes("milk")
-    ) {
-      return foods.milk;
-    }
-
-    if (
-      value.includes("مكرونة") ||
-      value.includes("مكرونه") ||
-      value.includes("pasta")
-    ) {
-      return foods.pasta;
-    }
-
-    if (
-      value.includes("لحمة") ||
-      value.includes("لحم") ||
-      value.includes("beef")
-    ) {
-      return foods.beef;
-    }
-
-    if (
-      value.includes("جبنة") ||
-      value.includes("جبنه") ||
-      value.includes("cheese")
-    ) {
-      return foods.cheese;
-    }
-
-    return null;
-
-  }
-
-
-  // =========================================================
-  // FOOD FORM
-  // =========================================================
-
-  $("#foodForm")?.addEventListener(
-    "submit",
-    (event) => {
-
-      event.preventDefault();
-
-      const foodName =
-        $("#foodName")
-          ?.value
-          ?.trim();
-
-      const food =
-        detectFood(
-          foodName
-        );
-
-      let calories =
-        getNumber(
-          "#foodCalories"
-        );
-
-      let protein =
-        getNumber(
-          "#foodProtein"
-        );
-
-      if (food) {
-
-        const gramMatch =
-          foodName.match(
-            /(\d+(?:\.\d+)?)\s*(?:جرام|غرام|g|جم)?/i
-          );
-
-        if (gramMatch) {
-
-          const grams =
-            Number(
-              gramMatch[1]
-            );
-
-          if (
-            calories <= 0
-          ) {
-
-            calories =
-              Math.round(
-                food.calories *
-                grams /
-                100
-              );
-
-          }
-
-          if (
-            protein <= 0
-          ) {
-
-            protein =
-              Math.round(
-                food.protein *
-                grams /
-                100
-              );
-
-          }
-
-        }
-
-      }
-
-      if (
-        calories <= 0 ||
-        protein < 0
-      ) {
-
-        showMessage(
-          "اكتب السعرات والبروتين بشكل صحيح",
-          "error"
-        );
-
-        return;
-
-      }
-
-      const today =
-        getTodayData();
-
-      today.calories +=
-        calories;
-
-      today.protein +=
-        protein;
-
-      today.meals.push({
-
-        name:
-          foodName,
-
-        type:
-          $("#mealType")
-            ?.value ||
-          "meal",
-
-        calories,
-
-        protein,
-
-        time:
-          new Date()
-            .toISOString()
-
-      });
-
-      saveLocalData();
-
-      updateDashboard();
-
-      closeModal(
-        "foodModal"
-      );
-
-      $("#foodForm").reset();
-
-      showMessage(
-        "تم تسجيل الوجبة بنجاح",
-        "success"
-      );
-
+} catch (error) {
+
+  console.error(
+    "Supabase initialization error:",
+    error
+  );
+
+}
+```
+
+}
+
+/* =====================================================
+HELPERS
+===================================================== */
+
+const $ = selector =>
+document.querySelector(selector);
+
+const $$ = selector =>
+Array.from(
+document.querySelectorAll(selector)
+);
+
+function safeText(selector, value) {
+
+```
+const element = $(selector);
+
+if (element) {
+  element.textContent = value;
+}
+```
+
+}
+
+function getNumber(
+selector,
+fallback = 0
+) {
+
+```
+const element = $(selector);
+
+if (!element) {
+  return fallback;
+}
+
+const value =
+  Number(element.value);
+
+return Number.isFinite(value)
+  ? value
+  : fallback;
+```
+
+}
+
+function showMessage(
+message,
+type = "info"
+) {
+
+```
+let box =
+  $("#appMessage");
+
+if (!box) {
+
+  box =
+    document.createElement("div");
+
+  box.id =
+    "appMessage";
+
+  Object.assign(
+    box.style,
+    {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      right: "20px",
+      zIndex: "99999",
+      padding: "15px",
+      borderRadius: "14px",
+      background: "#111827",
+      color: "#fff",
+      textAlign: "center",
+      fontWeight: "700",
+      boxShadow:
+        "0 10px 30px rgba(0,0,0,.25)"
     }
   );
 
+  document.body.appendChild(box);
 
-  // =========================================================
-  // FOOD LIST
-  // =========================================================
+}
 
-  function renderFoodList() {
 
-    const list =
-      $("#foodList");
+box.textContent =
+  message;
 
-    if (!list) {
-      return;
+
+box.style.background =
+  type === "error"
+    ? "#b91c1c"
+    : type === "success"
+    ? "#15803d"
+    : "#111827";
+
+
+clearTimeout(
+  box._timer
+);
+
+
+box._timer =
+  setTimeout(() => {
+
+    if (box) {
+      box.remove();
     }
 
-    const today =
-      getTodayData();
+  }, 4000);
+```
+
+}
+
+function showScreen(id) {
+
+```
+$$(".screen")
+  .forEach(screen => {
+
+    screen.classList.add(
+      "hidden"
+    );
+
+  });
+
+
+const screen =
+  $(`#${id}`);
+
+if (screen) {
+  screen.classList.remove(
+    "hidden"
+  );
+}
+```
+
+}
+
+function openModal(id) {
+
+```
+const modal =
+  $(`#${id}`);
+
+if (modal) {
+
+  modal.classList.remove(
+    "hidden"
+  );
+
+}
+```
+
+}
+
+function closeModal(id) {
+
+```
+const modal =
+  $(`#${id}`);
+
+if (modal) {
+
+  modal.classList.add(
+    "hidden"
+  );
+
+}
+```
+
+}
+
+function todayKey() {
+
+```
+const now =
+  new Date();
+
+const year =
+  now.getFullYear();
+
+const month =
+  String(
+    now.getMonth() + 1
+  ).padStart(2, "0");
+
+const day =
+  String(
+    now.getDate()
+  ).padStart(2, "0");
+
+return `${year}-${month}-${day}`;
+```
+
+}
+
+/* =====================================================
+LOCAL DATA
+===================================================== */
+
+const STORAGE_KEY =
+"dr_elorabi_user";
+
+let userData = {};
+
+try {
+
+```
+userData =
+  JSON.parse(
+    localStorage.getItem(
+      STORAGE_KEY
+    ) || "{}"
+  );
+```
+
+} catch {
+
+```
+userData = {};
+```
+
+}
+
+function saveLocalData() {
+
+```
+localStorage.setItem(
+  STORAGE_KEY,
+  JSON.stringify(
+    userData
+  )
+);
+```
+
+}
+
+/* =====================================================
+AGE
+===================================================== */
+
+function calculateAge(
+dateString
+) {
+
+```
+if (!dateString) {
+  return 0;
+}
+
+const birth =
+  new Date(dateString);
+
+if (
+  Number.isNaN(
+    birth.getTime()
+  )
+) {
+
+  return 0;
+
+}
+
+
+const today =
+  new Date();
+
+let age =
+  today.getFullYear() -
+  birth.getFullYear();
+
+const month =
+  today.getMonth() -
+  birth.getMonth();
+
+if (
+  month < 0 ||
+  (
+    month === 0 &&
+    today.getDate() <
+    birth.getDate()
+  )
+) {
+
+  age--;
+
+}
+
+
+return Math.max(
+  0,
+  age
+);
+```
+
+}
+
+/* =====================================================
+BMI
+===================================================== */
+
+function calculateBMI() {
+
+```
+const weight =
+  userData.weight ||
+  getNumber("#weight");
+
+const height =
+  userData.height ||
+  getNumber("#height");
+
+
+if (
+  weight <= 0 ||
+  height <= 0
+) {
+
+  return 0;
+
+}
+
+
+const heightMeters =
+  height / 100;
+
+
+return (
+  weight /
+  (
+    heightMeters *
+    heightMeters
+  )
+);
+```
+
+}
+
+function bmiStatus(bmi) {
+
+```
+if (bmi < 18.5) {
+  return "نقص وزن";
+}
+
+if (bmi < 25) {
+  return "طبيعي";
+}
+
+if (bmi < 30) {
+  return "زيادة وزن";
+}
+
+return "سمنة";
+```
+
+}
+
+/* =====================================================
+CALORIES
+===================================================== */
+
+function getActivityMultiplier() {
+
+```
+const activity =
+  userData.activity ||
+  $("#activity")?.value;
+
+
+const values = {
+
+  sedentary: 1.2,
+
+  light: 1.375,
+
+  moderate: 1.55,
+
+  high: 1.725
+
+};
+
+
+return (
+  values[activity] ||
+  1.2
+);
+```
+
+}
+
+function calculateCalories() {
+
+```
+const weight =
+  userData.weight ||
+  getNumber("#weight");
+
+const height =
+  userData.height ||
+  getNumber("#height");
+
+const birthDate =
+  userData.birthDate ||
+  $("#birthDate")?.value ||
+  "";
+
+const gender =
+  userData.gender ||
+  $("#gender")?.value ||
+  "male";
+
+const goal =
+  userData.goal ||
+  $("#goal")?.value ||
+  "maintenance";
+
+
+const age =
+  calculateAge(
+    birthDate
+  );
+
+
+if (
+  weight <= 0 ||
+  height <= 0 ||
+  age <= 0
+) {
+
+  return null;
+
+}
+
+
+let bmr;
+
+
+if (
+  gender === "female"
+) {
+
+  bmr =
+    (
+      10 * weight
+    ) +
+    (
+      6.25 * height
+    ) -
+    (
+      5 * age
+    ) -
+    161;
+
+} else {
+
+  bmr =
+    (
+      10 * weight
+    ) +
+    (
+      6.25 * height
+    ) -
+    (
+      5 * age
+    ) +
+    5;
+
+}
+
+
+const maintenance =
+  bmr *
+  getActivityMultiplier();
+
+
+let calories =
+  maintenance;
+
+
+if (
+  goal === "fat_loss"
+) {
+
+  calories =
+    maintenance - 400;
+
+}
+
+
+if (
+  goal === "muscle_gain"
+) {
+
+  calories =
+    maintenance + 250;
+
+}
+
+
+if (
+  goal === "recomposition"
+) {
+
+  calories =
+    maintenance - 150;
+
+}
+
+
+calories =
+  Math.max(
+    1200,
+    calories
+  );
+
+
+const protein =
+  Math.round(
+    weight * 1.8
+  );
+
+
+const water =
+  Math.round(
+    weight * 35
+  );
+
+
+return {
+
+  age,
+
+  bmr:
+    Math.round(
+      bmr
+    ),
+
+  maintenance:
+    Math.round(
+      maintenance
+    ),
+
+  calories:
+    Math.round(
+      calories
+    ),
+
+  protein,
+
+  water
+
+};
+```
+
+}
+
+/* =====================================================
+DAILY DATA
+===================================================== */
+
+function getTodayData() {
+
+```
+const key =
+  todayKey();
+
+
+if (!userData.daily) {
+
+  userData.daily = {};
+
+}
+
+
+if (
+  !userData.daily[key]
+) {
+
+  userData.daily[key] = {
+
+    calories: 0,
+
+    protein: 0,
+
+    water: 0,
+
+    meals: [],
+
+    exercises: [],
+
+    sleep: null
+
+  };
+
+}
+
+
+return userData.daily[key];
+```
+
+}
+
+/* =====================================================
+DASHBOARD
+===================================================== */
+
+function updateDashboard() {
+
+```
+const result =
+  calculateCalories();
+
+
+if (!result) {
+  return;
+}
+
+
+const today =
+  getTodayData();
+
+
+safeText(
+  "#calorieTarget",
+  result.calories
+);
+
+
+safeText(
+  "#proteinTarget",
+  result.protein
+);
+
+
+safeText(
+  "#waterTarget",
+  result.water
+);
+
+
+safeText(
+  "#caloriesConsumed",
+  today.calories
+);
+
+
+safeText(
+  "#caloriesGoal",
+  result.calories
+);
+
+
+safeText(
+  "#proteinConsumed",
+  today.protein
+);
+
+
+safeText(
+  "#proteinGoal",
+  result.protein
+);
+
+
+safeText(
+  "#waterConsumed",
+  today.water
+);
+
+
+const bmi =
+  calculateBMI();
+
+
+if (bmi > 0) {
+
+  safeText(
+    "#bmiValue",
+    bmi.toFixed(1)
+  );
+
+
+  safeText(
+    "#bmiStatus",
+    bmiStatus(bmi)
+  );
+
+}
+
+
+const caloriePercent =
+  Math.min(
+    100,
+    (
+      today.calories /
+      result.calories
+    ) * 100
+  );
+
+
+const proteinPercent =
+  Math.min(
+    100,
+    (
+      today.protein /
+      result.protein
+    ) * 100
+  );
+
+
+const calorieBar =
+  $("#calorieProgress");
+
+
+const proteinBar =
+  $("#proteinProgress");
+
+
+if (calorieBar) {
+
+  calorieBar.style.width =
+    `${caloriePercent}%`;
+
+}
+
+
+if (proteinBar) {
+
+  proteinBar.style.width =
+    `${proteinPercent}%`;
+
+}
+
+
+renderFoodList();
+
+saveLocalData();
+```
+
+}
+
+/* =====================================================
+PROFILE
+===================================================== */
+
+const profileForm =
+$("#profileForm");
+
+if (profileForm) {
+
+```
+profileForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+
+    const name =
+      $("#fullName")
+        ?.value
+        .trim();
+
+
+    const birthDate =
+      $("#birthDate")
+        ?.value;
+
+
+    const gender =
+      $("#gender")
+        ?.value;
+
+
+    const height =
+      getNumber(
+        "#height"
+      );
+
+
+    const weight =
+      getNumber(
+        "#weight"
+      );
+
+
+    const goal =
+      $("#goal")
+        ?.value;
+
+
+    const activity =
+      $("#activity")
+        ?.value;
+
+
+    const likedFoods =
+      $("#likedFoods")
+        ?.value
+        .trim();
+
+
+    const dislikedFoods =
+      $("#dislikedFoods")
+        ?.value
+        .trim();
+
+
+    const allergies =
+      $("#allergies")
+        ?.value
+        .trim();
+
+
+    const mealsPerDay =
+      Number(
+        $("#mealsPerDay")
+          ?.value || 4
+      );
+
 
     if (
-      !today.meals?.length
+      !name ||
+      !birthDate ||
+      !gender ||
+      !height ||
+      !weight ||
+      !goal ||
+      !activity
     ) {
 
-      list.innerHTML = `
-        <div class="empty-state">
-          مفيش وجبات مسجلة لسه
-        </div>
-      `;
+      showMessage(
+        "اكمل كل البيانات المطلوبة",
+        "error"
+      );
 
       return;
 
     }
 
-    list.innerHTML =
-      today.meals
-        .map(
-          (meal) => `
 
-          <div class="food-item">
+    userData.name =
+      name;
 
-            <div>
+    userData.birthDate =
+      birthDate;
 
-              <strong>
-                ${escapeHTML(
-                  meal.name
-                )}
-              </strong>
+    userData.gender =
+      gender;
 
-              <small>
-                ${meal.calories}
-                kcal
-                •
-                ${meal.protein}
-                g protein
-              </small>
+    userData.height =
+      height;
 
-            </div>
+    userData.weight =
+      weight;
 
-          </div>
+    userData.goal =
+      goal;
 
-        `
-        )
-        .join("");
+    userData.activity =
+      activity;
 
-  }
+    userData.likedFoods =
+      likedFoods;
 
+    userData.dislikedFoods =
+      dislikedFoods;
 
-  // =========================================================
-  // WATER
-  // =========================================================
+    userData.allergies =
+      allergies;
 
-  function addWater(
-    amount = 250
-  ) {
+    userData.mealsPerDay =
+      mealsPerDay;
 
-    const today =
-      getTodayData();
+    userData.profileCompleted =
+      true;
 
-    today.water +=
-      amount;
 
     saveLocalData();
 
-    updateDashboard();
+
+    await saveProfileToSupabase();
+
+
+    showDashboard();
+
 
     showMessage(
-      `تم تسجيل ${amount} مل ماء`,
+      "تم حفظ بياناتك وبناء خطتك بنجاح",
       "success"
     );
 
   }
+);
+```
+
+}
+
+/* =====================================================
+SAVE PROFILE
+===================================================== */
+
+async function saveProfileToSupabase() {
+
+```
+if (!supabaseClient) {
+  return;
+}
 
 
-  $("#waterBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-        addWater(250);
-      }
-    );
+try {
+
+  const {
+    data
+  } =
+    await supabaseClient
+      .auth
+      .getUser();
 
 
-  $("#addWaterBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-        addWater(250);
-      }
-    );
+  const user =
+    data?.user;
 
 
-  // =========================================================
-  // SLEEP
-  // =========================================================
-
-  $("#sleepForm")
-    ?.addEventListener(
-      "submit",
-      (event) => {
-
-        event.preventDefault();
-
-        const start =
-          new Date(
-            $("#sleepTime")
-              .value
-          );
-
-        const end =
-          new Date(
-            $("#wakeTime")
-              .value
-          );
-
-        if (
-          Number.isNaN(
-            start.getTime()
-          ) ||
-          Number.isNaN(
-            end.getTime()
-          )
-        ) {
-
-          showMessage(
-            "اختار وقت النوم والاستيقاظ",
-            "error"
-          );
-
-          return;
-
-        }
-
-        if (
-          end <= start
-        ) {
-
-          end.setDate(
-            end.getDate() + 1
-          );
-
-        }
-
-        const hours =
-          (
-            end - start
-          ) /
-          (
-            1000 *
-            60 *
-            60
-          );
-
-        const today =
-          getTodayData();
-
-        today.sleep = {
-
-          start:
-            start.toISOString(),
-
-          end:
-            end.toISOString(),
-
-          hours
-
-        };
-
-        saveLocalData();
-
-        const result =
-          $("#sleepResult");
-
-        if (result) {
-
-          result.innerHTML = `
-            <div class="sleep-result">
-              نومك:
-              <strong>
-                ${hours.toFixed(1)}
-                ساعة
-              </strong>
-            </div>
-          `;
-
-        }
-
-        showMessage(
-          "تم تسجيل النوم بنجاح",
-          "success"
-        );
-
-      }
-    );
-
-
-  // =========================================================
-  // EXERCISE
-  // =========================================================
-
-  $("#exerciseForm")
-    ?.addEventListener(
-      "submit",
-      (event) => {
-
-        event.preventDefault();
-
-        const name =
-          $("#exerciseName")
-            ?.value
-            ?.trim();
-
-        const duration =
-          getNumber(
-            "#exerciseDuration"
-          );
-
-        const calories =
-          getNumber(
-            "#exerciseCalories"
-          );
-
-        if (
-          !name ||
-          duration <= 0
-        ) {
-
-          showMessage(
-            "اكتب بيانات التمرين بشكل صحيح",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const today =
-          getTodayData();
-
-        today.exercises.push({
-
-          name,
-
-          duration,
-
-          calories,
-
-          time:
-            new Date()
-              .toISOString()
-
-        });
-
-        saveLocalData();
-
-        closeModal(
-          "exerciseModal"
-        );
-
-        $("#exerciseForm")
-          .reset();
-
-        showMessage(
-          "تم تسجيل التمرين بنجاح",
-          "success"
-        );
-
-      }
-    );
-
-
-  // =========================================================
-  // MODALS
-  // =========================================================
-
-  function openModal(id) {
-
-    const modal =
-      $(`#${id}`);
-
-    if (modal) {
-
-      modal.classList.remove(
-        "hidden"
-      );
-
-    }
-
+  if (!user) {
+    return;
   }
 
 
-  function closeModal(id) {
+  const profile = {
 
-    const modal =
-      $(`#${id}`);
+    id:
+      user.id,
 
-    if (modal) {
+    email:
+      user.email,
 
-      modal.classList.add(
-        "hidden"
-      );
+    full_name:
+      userData.name,
 
-    }
+    birth_date:
+      userData.birthDate,
+
+    gender:
+      userData.gender,
+
+    height:
+      userData.height,
+
+    weight:
+      userData.weight,
+
+    goal:
+      userData.goal,
+
+    activity:
+      userData.activity,
+
+    liked_foods:
+      userData.likedFoods,
+
+    disliked_foods:
+      userData.dislikedFoods,
+
+    allergies:
+      userData.allergies,
+
+    meals_per_day:
+      userData.mealsPerDay
+
+  };
+
+
+  const result =
+    await supabaseClient
+      .from("profiles")
+      .upsert(profile);
+
+
+  if (result.error) {
+
+    console.warn(
+      "Profile save:",
+      result.error
+    );
 
   }
 
+} catch (error) {
 
-  $("#logFoodBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-        openModal(
-          "foodModal"
+  console.warn(
+    "Profile save error:",
+    error
+  );
+
+}
+```
+
+}
+
+/* =====================================================
+DASHBOARD / PROFILE
+===================================================== */
+
+function showDashboard() {
+
+```
+showScreen(
+  "dashboardScreen"
+);
+
+
+safeText(
+  "#welcomeName",
+  userData.name ||
+  "اهلا بيك"
+);
+
+
+updateDashboard();
+
+updateDate();
+```
+
+}
+
+function showProfile() {
+
+```
+showScreen(
+  "profileScreen"
+);
+
+loadProfileInputs();
+```
+
+}
+
+function loadProfileInputs() {
+
+```
+if (userData.name) {
+
+  $("#fullName").value =
+    userData.name;
+
+}
+
+
+if (userData.birthDate) {
+
+  $("#birthDate").value =
+    userData.birthDate;
+
+}
+
+
+if (userData.gender) {
+
+  $("#gender").value =
+    userData.gender;
+
+}
+
+
+if (userData.height) {
+
+  $("#height").value =
+    userData.height;
+
+}
+
+
+if (userData.weight) {
+
+  $("#weight").value =
+    userData.weight;
+
+}
+
+
+if (userData.goal) {
+
+  $("#goal").value =
+    userData.goal;
+
+}
+
+
+if (userData.activity) {
+
+  $("#activity").value =
+    userData.activity;
+
+}
+
+
+if (userData.likedFoods) {
+
+  $("#likedFoods").value =
+    userData.likedFoods;
+
+}
+
+
+if (userData.dislikedFoods) {
+
+  $("#dislikedFoods").value =
+    userData.dislikedFoods;
+
+}
+
+
+if (userData.allergies) {
+
+  $("#allergies").value =
+    userData.allergies;
+
+}
+
+
+if (userData.mealsPerDay) {
+
+  $("#mealsPerDay").value =
+    userData.mealsPerDay;
+
+}
+```
+
+}
+
+/* =====================================================
+FOOD DATABASE
+===================================================== */
+
+const foods = {
+
+```
+chicken: {
+  name: "صدر فراخ مشوي",
+  calories: 165,
+  protein: 31
+},
+
+rice: {
+  name: "أرز مطبوخ",
+  calories: 130,
+  protein: 2.7
+},
+
+eggs: {
+  name: "بيض",
+  calories: 143,
+  protein: 12.6
+},
+
+oats: {
+  name: "شوفان",
+  calories: 389,
+  protein: 16.9
+},
+
+banana: {
+  name: "موز",
+  calories: 89,
+  protein: 1.1
+},
+
+yogurt: {
+  name: "زبادي",
+  calories: 61,
+  protein: 3.5
+},
+
+tuna: {
+  name: "تونة",
+  calories: 132,
+  protein: 28
+},
+
+potato: {
+  name: "بطاطس",
+  calories: 77,
+  protein: 2
+},
+
+bread: {
+  name: "خبز",
+  calories: 265,
+  protein: 9
+},
+
+milk: {
+  name: "لبن",
+  calories: 61,
+  protein: 3.2
+},
+
+pasta: {
+  name: "مكرونة مطبوخة",
+  calories: 157,
+  protein: 5.8
+},
+
+beef: {
+  name: "لحم بقري",
+  calories: 250,
+  protein: 26
+},
+
+cheese: {
+  name: "جبنة",
+  calories: 350,
+  protein: 25
+}
+```
+
+};
+
+function detectFood(text) {
+
+```
+const value =
+  String(text)
+    .toLowerCase()
+    .trim();
+
+
+if (
+  value.includes("فراخ") ||
+  value.includes("دجاج") ||
+  value.includes("chicken")
+) {
+  return foods.chicken;
+}
+
+
+if (
+  value.includes("رز") ||
+  value.includes("أرز") ||
+  value.includes("rice")
+) {
+  return foods.rice;
+}
+
+
+if (
+  value.includes("بيض") ||
+  value.includes("egg")
+) {
+  return foods.eggs;
+}
+
+
+if (
+  value.includes("شوفان") ||
+  value.includes("oat")
+) {
+  return foods.oats;
+}
+
+
+if (
+  value.includes("موز") ||
+  value.includes("banana")
+) {
+  return foods.banana;
+}
+
+
+if (
+  value.includes("زبادي") ||
+  value.includes("yogurt")
+) {
+  return foods.yogurt;
+}
+
+
+if (
+  value.includes("تونة") ||
+  value.includes("tuna")
+) {
+  return foods.tuna;
+}
+
+
+if (
+  value.includes("بطاطس") ||
+  value.includes("potato")
+) {
+  return foods.potato;
+}
+
+
+if (
+  value.includes("عيش") ||
+  value.includes("خبز") ||
+  value.includes("bread")
+) {
+  return foods.bread;
+}
+
+
+if (
+  value.includes("لبن") ||
+  value.includes("milk")
+) {
+  return foods.milk;
+}
+
+
+if (
+  value.includes("مكرونة") ||
+  value.includes("مكرونه") ||
+  value.includes("pasta")
+) {
+  return foods.pasta;
+}
+
+
+if (
+  value.includes("لحمة") ||
+  value.includes("لحم") ||
+  value.includes("beef")
+) {
+  return foods.beef;
+}
+
+
+if (
+  value.includes("جبنة") ||
+  value.includes("جبنه") ||
+  value.includes("cheese")
+) {
+  return foods.cheese;
+}
+
+
+return null;
+```
+
+}
+
+/* =====================================================
+FOOD FORM
+===================================================== */
+
+$("#foodForm")
+?.addEventListener(
+"submit",
+event => {
+
+```
+    event.preventDefault();
+
+
+    const foodName =
+      $("#foodName")
+        ?.value
+        ?.trim();
+
+
+    const food =
+      detectFood(
+        foodName
+      );
+
+
+    let calories =
+      getNumber(
+        "#foodCalories"
+      );
+
+
+    let protein =
+      getNumber(
+        "#foodProtein"
+      );
+
+
+    if (food) {
+
+      const gramMatch =
+        foodName.match(
+          /(\d+(?:\.\d+)?)\s*(?:جرام|غرام|g|جم)?/i
         );
-      }
-    );
 
 
-  $("#sleepBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-        openModal(
-          "sleepModal"
-        );
-      }
-    );
+      if (gramMatch) {
+
+        const grams =
+          Number(
+            gramMatch[1]
+          );
 
 
-  $("#exerciseBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-        openModal(
-          "exerciseModal"
-        );
-      }
-    );
+        if (
+          calories <= 0
+        ) {
+
+          calories =
+            Math.round(
+              food.calories *
+              grams /
+              100
+            );
+
+        }
 
 
-  $("#proBtn")
-    ?.addEventListener(
-      "click",
-      async () => {
+        if (
+          protein <= 0
+        ) {
 
-        openModal(
-          "proModal"
-        );
+          protein =
+            Math.round(
+              food.protein *
+              grams /
+              100
+            );
 
-        await loadMyPaymentStatus();
-
-      }
-    );
-
-
-  $$(".close-modal")
-    .forEach(
-      (button) => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const id =
-              button.dataset.close;
-
-            if (id) {
-              closeModal(id);
-            }
-
-          }
-        );
+        }
 
       }
-    );
 
+    }
 
-  $$(".modal")
-    .forEach(
-      (modal) => {
-
-        modal.addEventListener(
-          "click",
-          (event) => {
-
-            if (
-              event.target ===
-              modal
-            ) {
-
-              modal.classList.add(
-                "hidden"
-              );
-
-            }
-
-          }
-        );
-
-      }
-    );
-
-
-  // =========================================================
-  // PAYMENT UI
-  // =========================================================
-
-  const requestProBtn =
-    $("#requestProBtn");
-
-  const paymentScreenshot =
-    $("#paymentScreenshot");
-
-  const confirmPaymentBtn =
-    $("#confirmPaymentBtn");
-
-  const paymentLink =
-    $("#paymentLink");
-
-  const proPaymentArea =
-    $("#proPaymentArea");
-
-  const proMessage =
-    $("#proMessage");
-
-
-  function showPaymentArea() {
 
     if (
-      proPaymentArea
+      calories <= 0 ||
+      protein < 0
     ) {
+
+      showMessage(
+        "اكتب السعرات والبروتين بشكل صحيح",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const today =
+      getTodayData();
+
+
+    today.calories +=
+      calories;
+
+
+    today.protein +=
+      protein;
+
+
+    today.meals.push({
+
+      name:
+        foodName,
+
+      type:
+        $("#mealType")?.value ||
+        "meal",
+
+      calories,
+
+      protein,
+
+      time:
+        new Date()
+          .toISOString()
+
+    });
+
+
+    saveLocalData();
+
+    updateDashboard();
+
+    closeModal(
+      "foodModal"
+    );
+
+
+    $("#foodForm")
+      .reset();
+
+
+    showMessage(
+      "تم تسجيل الوجبة بنجاح",
+      "success"
+    );
+
+  }
+);
+```
+
+/* =====================================================
+FOOD LIST
+===================================================== */
+
+function escapeHTML(text) {
+
+```
+return String(text)
+  .replaceAll(
+    "&",
+    "&amp;"
+  )
+  .replaceAll(
+    "<",
+    "&lt;"
+  )
+  .replaceAll(
+    ">",
+    "&gt;"
+  )
+  .replaceAll(
+    '"',
+    "&quot;"
+  )
+  .replaceAll(
+    "'",
+    "&#039;"
+  );
+```
+
+}
+
+function renderFoodList() {
+
+```
+const list =
+  $("#foodList");
+
+
+if (!list) {
+  return;
+}
+
+
+const today =
+  getTodayData();
+
+
+if (
+  !today.meals?.length
+) {
+
+  list.innerHTML = `
+    <div class="empty-state">
+      مفيش وجبات مسجلة لسه
+    </div>
+  `;
+
+  return;
+
+}
+
+
+list.innerHTML =
+  today.meals
+    .map(
+      meal => `
+
+        <div class="food-item">
+
+          <div>
+
+            <strong>
+              ${escapeHTML(
+                meal.name
+              )}
+            </strong>
+
+            <small>
+              ${meal.calories}
+              kcal
+              •
+              ${meal.protein}
+              g protein
+            </small>
+
+          </div>
+
+        </div>
+
+      `
+    )
+    .join("");
+```
+
+}
+
+/* =====================================================
+WATER
+===================================================== */
+
+function addWater(
+amount = 250
+) {
+
+```
+const today =
+  getTodayData();
+
+
+today.water +=
+  amount;
+
+
+saveLocalData();
+
+updateDashboard();
+
+
+showMessage(
+  `تم تسجيل ${amount} مل ماء`,
+  "success"
+);
+```
+
+}
+
+$("#waterBtn")
+?.addEventListener(
+"click",
+() => addWater(250)
+);
+
+$("#addWaterBtn")
+?.addEventListener(
+"click",
+() => addWater(250)
+);
+
+/* =====================================================
+SLEEP
+===================================================== */
+
+$("#sleepForm")
+?.addEventListener(
+"submit",
+event => {
+
+```
+    event.preventDefault();
+
+
+    const start =
+      new Date(
+        $("#sleepTime").value
+      );
+
+
+    const end =
+      new Date(
+        $("#wakeTime").value
+      );
+
+
+    if (
+      Number.isNaN(
+        start.getTime()
+      ) ||
+      Number.isNaN(
+        end.getTime()
+      )
+    ) {
+
+      showMessage(
+        "اختار وقت النوم والاستيقاظ",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (end <= start) {
+
+      end.setDate(
+        end.getDate() + 1
+      );
+
+    }
+
+
+    const hours =
+      (
+        end - start
+      ) /
+      (
+        1000 *
+        60 *
+        60
+      );
+
+
+    const today =
+      getTodayData();
+
+
+    today.sleep = {
+
+      start:
+        start.toISOString(),
+
+      end:
+        end.toISOString(),
+
+      hours
+
+    };
+
+
+    saveLocalData();
+
+
+    const result =
+      $("#sleepResult");
+
+
+    if (result) {
+
+      result.innerHTML = `
+
+        <div class="sleep-result">
+
+          نومك:
+
+          <strong>
+            ${hours.toFixed(1)}
+            ساعة
+          </strong>
+
+        </div>
+
+      `;
+
+    }
+
+
+    showMessage(
+      "تم تسجيل النوم بنجاح",
+      "success"
+    );
+
+  }
+);
+```
+
+/* =====================================================
+EXERCISE
+===================================================== */
+
+$("#exerciseForm")
+?.addEventListener(
+"submit",
+event => {
+
+```
+    event.preventDefault();
+
+
+    const name =
+      $("#exerciseName")
+        ?.value
+        ?.trim();
+
+
+    const duration =
+      getNumber(
+        "#exerciseDuration"
+      );
+
+
+    const calories =
+      getNumber(
+        "#exerciseCalories"
+      );
+
+
+    if (
+      !name ||
+      duration <= 0
+    ) {
+
+      showMessage(
+        "اكتب بيانات التمرين بشكل صحيح",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const today =
+      getTodayData();
+
+
+    today.exercises.push({
+
+      name,
+
+      duration,
+
+      calories,
+
+      time:
+        new Date()
+          .toISOString()
+
+    });
+
+
+    saveLocalData();
+
+
+    closeModal(
+      "exerciseModal"
+    );
+
+
+    $("#exerciseForm")
+      .reset();
+
+
+    showMessage(
+      "تم تسجيل التمرين بنجاح",
+      "success"
+    );
+
+  }
+);
+```
+
+/* =====================================================
+MODAL BUTTONS
+===================================================== */
+
+$("#logFoodBtn")
+?.addEventListener(
+"click",
+() =>
+openModal(
+"foodModal"
+)
+);
+
+$("#sleepBtn")
+?.addEventListener(
+"click",
+() =>
+openModal(
+"sleepModal"
+)
+);
+
+$("#exerciseBtn")
+?.addEventListener(
+"click",
+() =>
+openModal(
+"exerciseModal"
+)
+);
+
+$("#proBtn")
+?.addEventListener(
+"click",
+() => {
+
+```
+    openModal(
+      "proModal"
+    );
+
+  }
+);
+```
+
+$$(".close-modal")
+.forEach(button => {
+
+```
+  button.addEventListener(
+    "click",
+    () => {
+
+      const id =
+        button.dataset.close;
+
+      if (id) {
+
+        closeModal(
+          id
+        );
+
+      }
+
+    }
+  );
+
+});
+```
+
+$$(".modal")
+.forEach(modal => {
+
+```
+  modal.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        modal
+      ) {
+
+        modal.classList.add(
+          "hidden"
+        );
+
+      }
+
+    }
+  );
+
+});
+```
+
+/* =====================================================
+PRO PAYMENT
+===================================================== */
+
+const PAYMENT_URL =
+"https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
+
+const requestProBtn =
+$("#requestProBtn");
+
+const paymentScreenshot =
+$("#paymentScreenshot");
+
+const confirmPaymentBtn =
+$("#confirmPaymentBtn");
+
+const paymentLink =
+$("#paymentLink");
+
+const proPaymentArea =
+$("#proPaymentArea");
+
+const proMessage =
+$("#proMessage");
+
+if (requestProBtn) {
+
+```
+requestProBtn.addEventListener(
+  "click",
+  async () => {
+
+    if (!supabaseClient) {
+
+      showMessage(
+        "Supabase غير متصل",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const {
+      data: sessionData,
+      error: sessionError
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    if (
+      sessionError ||
+      !sessionData?.session
+    ) {
+
+      showMessage(
+        "سجل دخولك اولا قبل طلب PRO",
+        "error"
+      );
+
+      showScreen(
+        "authScreen"
+      );
+
+      return;
+
+    }
+
+
+    if (proPaymentArea) {
 
       proPaymentArea.classList.remove(
         "hidden"
@@ -1835,9 +2053,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
-    if (
-      paymentLink
-    ) {
+
+    if (proMessage) {
+
+      proMessage.textContent =
+```
+
+`اهلا ${
+userData.name ||
+"مستخدم"
+}
+
+لتفعيل dr.elorabi PRO:
+
+💰 قيمة الاشتراك: 50 جنيه
+
+1️⃣ اضغط زر الدفع.
+2️⃣ حول 50 جنيه.
+3️⃣ خذ Screenshot للتحويل.
+4️⃣ ارفع صورة التحويل.
+5️⃣ اضغط تأكيد الدفع.
+
+سيتم مراجعة التحويل من الإدارة.`;
+
+```
+    }
+
+
+    if (paymentLink) {
 
       paymentLink.href =
         PAYMENT_URL;
@@ -1848,1363 +2091,375 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
+
+    showMessage(
+      "ادفع 50 جنيه ثم ارفع صورة التحويل",
+      "success"
+    );
+
   }
+);
+```
+
+}
+
+/* =====================================================
+SCREENSHOT
+===================================================== */
+
+if (paymentScreenshot) {
+
+```
+paymentScreenshot.addEventListener(
+  "change",
+  () => {
+
+    const file =
+      paymentScreenshot
+        .files?.[0];
 
 
-  // =========================================================
-  // CHECK MY PAYMENT
-  // =========================================================
-
-  async function loadMyPaymentStatus() {
-
-    if (!supabaseClient) {
+    if (!file) {
       return;
     }
 
+
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
+
+      showMessage(
+        "ارفع صورة فقط",
+        "error"
+      );
+
+      paymentScreenshot.value =
+        "";
+
+      return;
+
+    }
+
+
+    if (
+      file.size >
+      5 * 1024 * 1024
+    ) {
+
+      showMessage(
+        "حجم الصورة أكبر من 5MB",
+        "error"
+      );
+
+      paymentScreenshot.value =
+        "";
+
+      return;
+
+    }
+
+
+    if (confirmPaymentBtn) {
+
+      confirmPaymentBtn.classList.remove(
+        "hidden"
+      );
+
+    }
+
+
+    showMessage(
+      "تم اختيار صورة التحويل",
+      "success"
+    );
+
+  }
+);
+```
+
+}
+
+/* =====================================================
+CONFIRM PAYMENT
+===================================================== */
+
+if (confirmPaymentBtn) {
+
+```
+confirmPaymentBtn.addEventListener(
+  "click",
+  async () => {
+
     try {
 
-      const {
-        data: sessionData
-      } =
-        await supabaseClient.auth
-          .getSession();
+      if (!supabaseClient) {
 
-      const session =
-        sessionData?.session;
+        showMessage(
+          "Supabase غير متصل",
+          "error"
+        );
 
-      if (!session) {
         return;
+
       }
 
-      const user =
-        session.user;
 
       const {
-        data,
-        error
+        data: sessionData,
+        error: sessionError
+      } =
+        await supabaseClient
+          .auth
+          .getSession();
+
+
+      if (
+        sessionError ||
+        !sessionData?.session
+      ) {
+
+        showMessage(
+          "سجل دخولك أولا",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      const user =
+        sessionData.session.user;
+
+
+      const file =
+        paymentScreenshot
+          ?.files?.[0];
+
+
+      if (!file) {
+
+        showMessage(
+          "ارفع صورة التحويل أولا",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      confirmPaymentBtn.disabled =
+        true;
+
+
+      confirmPaymentBtn.textContent =
+        "جاري إرسال الطلب...";
+
+
+      const extension =
+        file.name
+          .split(".")
+          .pop()
+          ?.toLowerCase() ||
+        "jpg";
+
+
+      const filePath =
+        `${user.id}/${Date.now()}.${extension}`;
+
+
+      /* UPLOAD */
+
+      const {
+        error: uploadError
+      } =
+        await supabaseClient
+          .storage
+          .from(
+            "payment-screenshots"
+          )
+          .upload(
+            filePath,
+            file,
+            {
+              cacheControl:
+                "3600",
+
+              upsert:
+                false
+            }
+          );
+
+
+      if (uploadError) {
+
+        console.error(
+          uploadError
+        );
+
+        throw new Error(
+          "فشل رفع صورة التحويل: " +
+          uploadError.message
+        );
+
+      }
+
+
+      /* PUBLIC URL */
+
+      const {
+        data: publicData
+      } =
+        supabaseClient
+          .storage
+          .from(
+            "payment-screenshots"
+          )
+          .getPublicUrl(
+            filePath
+          );
+
+
+      const screenshotUrl =
+        publicData?.publicUrl ||
+        filePath;
+
+
+      /* INSERT PAYMENT REQUEST */
+
+      const {
+        error: dbError
       } =
         await supabaseClient
           .from(
             "payment_requests"
           )
-          .select(
-            "*"
-          )
-          .eq(
-            "user_id",
-            user.id
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          )
-          .limit(1)
-          .maybeSingle();
+          .insert({
 
-      if (error) {
+            user_id:
+              user.id,
 
-        console.warn(
-          "Payment status:",
-          error
+            amount:
+              50,
+
+            payment_method:
+              "InstaPay",
+
+            transaction_reference:
+              null,
+
+            screenshot_url:
+              screenshotUrl,
+
+            status:
+              "pending"
+
+          });
+
+
+      if (dbError) {
+
+        console.error(
+          dbError
         );
 
-        return;
-
-      }
-
-      if (!data) {
-
-        showPaymentArea();
-
-        if (
-          proMessage
-        ) {
-
-          proMessage.textContent =
-            `أهلا ${
-              userData.name ||
-              "مستخدم"
-            } 👋
-
-لتفعيل dr.elorabi PRO:
-
-💰 قيمة الاشتراك: 50 جنيه
-
-1️⃣ اضغط زر الدفع.
-2️⃣ حول 50 جنيه.
-3️⃣ خذ Screenshot للتحويل.
-4️⃣ ارفع صورة التحويل.
-5️⃣ اضغط تأكيد الدفع.
-
-سيتم مراجعة التحويل من الإدارة.`;
-
-        }
-
-        if (
-          requestProBtn
-        ) {
-
-          requestProBtn.classList.remove(
-            "hidden"
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        data.status ===
-        "approved"
-      ) {
-
-        userData.pro =
-          true;
-
-        userData.paymentStatus =
-          "approved";
-
-        saveLocalData();
-
-        if (
-          proMessage
-        ) {
-
-          proMessage.innerHTML =
-            `
-              <div class="approved-box">
-                ✅ تم تفعيل PRO بنجاح
-                <br>
-                حسابك حاليا PRO
-              </div>
-            `;
-
-        }
-
-        if (
-          requestProBtn
-        ) {
-
-          requestProBtn.classList.add(
-            "hidden"
-          );
-
-        }
-
-        if (
-          confirmPaymentBtn
-        ) {
-
-          confirmPaymentBtn.classList.add(
-            "hidden"
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        data.status ===
-        "pending"
-      ) {
-
-        showPaymentArea();
-
-        if (
-          proMessage
-        ) {
-
-          proMessage.innerHTML =
-            `
-              <div class="pending-box">
-                ⏳ طلب الدفع قيد المراجعة
-                <br>
-                استنى موافقة الإدارة.
-              </div>
-            `;
-
-        }
-
-        if (
-          requestProBtn
-        ) {
-
-          requestProBtn.classList.add(
-            "hidden"
-          );
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        data.status ===
-        "rejected"
-      ) {
-
-        showPaymentArea();
-
-        if (
-          proMessage
-        ) {
-
-          proMessage.innerHTML =
-            `
-              <div class="rejected-box">
-                ❌ تم رفض طلب الدفع
-                <br>
-                يمكنك إرسال طلب جديد.
-              </div>
-            `;
-
-        }
-
-        if (
-          requestProBtn
-        ) {
-
-          requestProBtn.classList.remove(
-            "hidden"
-          );
-
-        }
-
-        return;
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-    }
-
-  }
-
-
-  // =========================================================
-  // REQUEST PRO
-  // =========================================================
-
-  if (requestProBtn) {
-
-    requestProBtn.addEventListener(
-      "click",
-      async () => {
-
-        if (!supabaseClient) {
-
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const {
-          data: sessionData
-        } =
-          await supabaseClient.auth
-            .getSession();
-
-        if (
-          !sessionData?.session
-        ) {
-
-          showMessage(
-            "سجل دخولك أولا قبل طلب PRO",
-            "error"
-          );
-
-          showScreen(
-            "authScreen"
-          );
-
-          return;
-
-        }
-
-        showPaymentArea();
-
-        if (
-          proMessage
-        ) {
-
-          proMessage.textContent =
-            `أهلا ${
-              userData.name ||
-              "مستخدم"
-            } 👋
-
-لتفعيل dr.elorabi PRO:
-
-💰 قيمة الاشتراك: 50 جنيه
-
-1️⃣ اضغط زر الدفع.
-2️⃣ حول 50 جنيه.
-3️⃣ خذ Screenshot للتحويل.
-4️⃣ ارفع صورة التحويل.
-5️⃣ اضغط تأكيد الدفع.
-
-سيتم مراجعة التحويل من الإدارة.`;
-
-        }
-
-        showMessage(
-          "ادفع 50 جنيه ثم ارفع صورة التحويل",
-          "success"
-        );
-
-      }
-    );
-
-  }
-
-
-  // =========================================================
-  // SCREENSHOT
-  // =========================================================
-
-  if (paymentScreenshot) {
-
-    paymentScreenshot.addEventListener(
-      "change",
-      () => {
-
-        const file =
-          paymentScreenshot
-            .files?.[0];
-
-        if (!file) {
-          return;
-        }
-
-        if (
-          !file.type.startsWith(
-            "image/"
-          )
-        ) {
-
-          showMessage(
-            "ارفع صورة فقط",
-            "error"
-          );
-
-          paymentScreenshot.value =
-            "";
-
-          return;
-
-        }
-
-        if (
-          file.size >
-          5 * 1024 * 1024
-        ) {
-
-          showMessage(
-            "حجم الصورة أكبر من 5MB",
-            "error"
-          );
-
-          paymentScreenshot.value =
-            "";
-
-          return;
-
-        }
-
-        if (
-          confirmPaymentBtn
-        ) {
-
-          confirmPaymentBtn.classList.remove(
-            "hidden"
-          );
-
-        }
-
-        showMessage(
-          "تم اختيار صورة التحويل",
-          "success"
-        );
-
-      }
-    );
-
-  }
-
-
-  // =========================================================
-  // CONFIRM PAYMENT
-  // =========================================================
-
-  if (
-    confirmPaymentBtn
-  ) {
-
-    confirmPaymentBtn.addEventListener(
-      "click",
-      async () => {
-
-        try {
-
-          if (!supabaseClient) {
-
-            showMessage(
-              "Supabase غير متصل",
-              "error"
-            );
-
-            return;
-
-          }
-
-          const {
-            data: sessionData,
-            error: sessionError
-          } =
-            await supabaseClient.auth
-              .getSession();
-
-          if (
-            sessionError ||
-            !sessionData?.session
-          ) {
-
-            showMessage(
-              "سجل دخولك أولا",
-              "error"
-            );
-
-            return;
-
-          }
-
-          const user =
-            sessionData
-              .session
-              .user;
-
-          const file =
-            paymentScreenshot
-              ?.files?.[0];
-
-          if (!file) {
-
-            showMessage(
-              "ارفع صورة التحويل أولا",
-              "error"
-            );
-
-            return;
-
-          }
-
-          confirmPaymentBtn.disabled =
-            true;
-
-          confirmPaymentBtn.textContent =
-            "جاري إرسال الطلب...";
-
-
-          const extension =
-            file.name
-              .split(".")
-              .pop()
-              ?.toLowerCase() ||
-            "jpg";
-
-
-          const filePath =
-            `${user.id}/${Date.now()}.${extension}`;
-
-
-          // -----------------------------------------
-          // UPLOAD
-          // -----------------------------------------
-
-          const {
-            error: uploadError
-          } =
-            await supabaseClient.storage
-              .from(
-                "payment-screenshots"
-              )
-              .upload(
-                filePath,
-                file,
-                {
-                  cacheControl:
-                    "3600",
-
-                  upsert:
-                    false
-                }
-              );
-
-
-          if (uploadError) {
-
-            console.error(
-              uploadError
-            );
-
-            throw new Error(
-              "فشل رفع صورة التحويل: " +
-              uploadError.message
-            );
-
-          }
-
-
-          // -----------------------------------------
-          // PRIVATE STORAGE URL
-          // -----------------------------------------
-
-          const {
-            data: signedData,
-            error: signedError
-          } =
-            await supabaseClient.storage
-              .from(
-                "payment-screenshots"
-              )
-              .createSignedUrl(
-                filePath,
-                60 * 60 * 24 * 30
-              );
-
-
-          if (signedError) {
-
-            console.warn(
-              "Signed URL:",
-              signedError
-            );
-
-          }
-
-
-          const screenshotUrl =
-            signedData?.signedUrl ||
-            filePath;
-
-
-          // -----------------------------------------
-          // INSERT PAYMENT
-          // -----------------------------------------
-
-          const {
-            error: dbError
-          } =
-            await supabaseClient
-              .from(
-                "payment_requests"
-              )
-              .insert({
-
-                user_id:
-                  user.id,
-
-                amount:
-                  50,
-
-                payment_method:
-                  "InstaPay",
-
-                transaction_reference:
-                  null,
-
-                screenshot_url:
-                  screenshotUrl,
-
-                status:
-                  "pending"
-
-              });
-
-
-          if (dbError) {
-
-            console.error(
-              dbError
-            );
-
-            throw new Error(
-              "فشل تسجيل طلب الدفع: " +
-              dbError.message
-            );
-
-          }
-
-
-          userData.paymentStatus =
-            "pending";
-
-          userData.paymentSubmittedAt =
-            new Date()
-              .toISOString();
-
-          saveLocalData();
-
-
-          if (
-            proMessage
-          ) {
-
-            proMessage.innerHTML =
-              `
-                <div class="pending-box">
-                  ✅ تم إرسال طلب الدفع بنجاح
-                  <br>
-                  طلبك حاليا قيد المراجعة.
-                </div>
-              `;
-
-          }
-
-
-          confirmPaymentBtn.textContent =
-            "تم إرسال الطلب ✓";
-
-          confirmPaymentBtn.classList.add(
-            "hidden"
-          );
-
-
-          if (
-            requestProBtn
-          ) {
-
-            requestProBtn.classList.add(
-              "hidden"
-            );
-
-          }
-
-
-          showMessage(
-            "تم إرسال طلب PRO للإدارة",
-            "success"
-          );
-
-
-        } catch (error) {
-
-          console.error(
-            "Payment error:",
-            error
-          );
-
-          confirmPaymentBtn.disabled =
-            false;
-
-          confirmPaymentBtn.textContent =
-            "تأكيد الدفع";
-
-          showMessage(
-            error.message ||
-            "حدث خطأ غير متوقع",
-            "error"
-          );
-
-        }
-
-      }
-    );
-
-  }
-
-
-  // =========================================================
-  // SIGN UP
-  // =========================================================
-
-  $("#signupForm")
-    ?.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        if (!supabaseClient) {
-
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const email =
-          $("#signupEmail")
-            ?.value
-            ?.trim();
-
-        const password =
-          $("#signupPassword")
-            ?.value;
-
-        if (
-          !email ||
-          !password
-        ) {
-
-          showMessage(
-            "اكتب البريد وكلمة المرور",
-            "error"
-          );
-
-          return;
-
-        }
-
-        if (
-          password.length < 6
-        ) {
-
-          showMessage(
-            "كلمة المرور لازم تكون 6 حروف أو أكثر",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const {
-          data,
-          error
-        } =
-          await supabaseClient.auth
-            .signUp({
-
-              email,
-
-              password
-
-            });
-
-
-        if (error) {
-
-          console.error(
-            error
-          );
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-          return;
-
-        }
-
-
-        if (
-          data?.session
-        ) {
-
-          showMessage(
-            "تم إنشاء الحساب وتسجيل الدخول",
-            "success"
-          );
-
-          await loadCurrentUser();
-
-        } else {
-
-          showMessage(
-            "تم إنشاء الحساب. راجع الإيميل لتأكيد الحساب ثم سجل الدخول.",
-            "success"
-          );
-
-          $("#signupBox")
-            ?.classList.add(
-              "hidden"
-            );
-
-          $("#loginBox")
-            ?.classList.remove(
-              "hidden"
-            );
-
-        }
-
-      }
-    );
-
-
-  // =========================================================
-  // LOGIN
-  // =========================================================
-
-  $("#loginForm")
-    ?.addEventListener(
-      "submit",
-      async (event) => {
-
-        event.preventDefault();
-
-        if (!supabaseClient) {
-
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const email =
-          $("#loginEmail")
-            ?.value
-            ?.trim();
-
-        const password =
-          $("#loginPassword")
-            ?.value;
-
-        if (
-          !email ||
-          !password
-        ) {
-
-          showMessage(
-            "اكتب البريد وكلمة المرور",
-            "error"
-          );
-
-          return;
-
-        }
-
-        const {
-          data,
-          error
-        } =
-          await supabaseClient.auth
-            .signInWithPassword({
-
-              email,
-
-              password
-
-            });
-
-
-        if (error) {
-
-          console.error(
-            error
-          );
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-          return;
-
-        }
-
-        if (
-          !data?.session
-        ) {
-
-          showMessage(
-            "لم يتم إنشاء جلسة دخول",
-            "error"
-          );
-
-          return;
-
-        }
-
-        showMessage(
-          "تم تسجيل الدخول بنجاح",
-          "success"
-        );
-
-        await loadCurrentUser();
-
-      }
-    );
-
-
-  // =========================================================
-  // LOGOUT
-  // =========================================================
-
-  $("#logoutBtn")
-    ?.addEventListener(
-      "click",
-      async () => {
-
-        if (
-          supabaseClient
-        ) {
-
-          await supabaseClient.auth
-            .signOut();
-
-        }
-
-        userData = {};
-
-        localStorage.removeItem(
-          STORAGE_KEY
-        );
-
-        showScreen(
-          "authScreen"
-        );
-
-        showMessage(
-          "تم تسجيل الخروج",
-          "success"
-        );
-
-      }
-    );
-
-
-  // =========================================================
-  // LOAD CURRENT USER
-  // =========================================================
-
-  async function loadCurrentUser() {
-
-    if (!supabaseClient) {
-
-      if (
-        userData.profileCompleted
-      ) {
-
-        showDashboard();
-
-      } else {
-
-        showScreen(
-          "authScreen"
+        throw new Error(
+          "فشل تسجيل طلب الدفع: " +
+          dbError.message
         );
 
       }
 
-      return;
 
-    }
+      /* LOCAL STATUS */
 
+      userData.paymentStatus =
+        "pending";
 
-    try {
 
-      const {
-        data: sessionData
-      } =
-        await supabaseClient.auth
-          .getSession();
-
-      const session =
-        sessionData?.session;
-
-      if (!session) {
-
-        showScreen(
-          "authScreen"
-        );
-
-        return;
-
-      }
-
-      const user =
-        session.user;
-
-
-      // ADMIN
-      userData.isAdmin =
-        user.email
-          ?.toLowerCase() ===
-        ADMIN_EMAIL
-          .toLowerCase();
-
-
-      userData.email =
-        user.email;
-
-
-      await loadProfileFromSupabase(
-        user
-      );
-
-
-      await loadMyPaymentStatus();
-
-
-      if (
-        userData.profileCompleted
-      ) {
-
-        showDashboard();
-
-      } else {
-
-        showProfile();
-
-      }
-
-
-      if (
-        userData.isAdmin
-      ) {
-
-        $("#adminBtn")
-          ?.classList.remove(
-            "hidden"
-          );
-
-      }
-
-
-    } catch (error) {
-
-      console.error(
-        error
-      );
-
-      if (
-        userData.profileCompleted
-      ) {
-
-        showDashboard();
-
-      } else {
-
-        showScreen(
-          "authScreen"
-        );
-
-      }
-
-    }
-
-  }
-
-
-  // =========================================================
-  // LOAD PROFILE
-  // =========================================================
-
-  async function loadProfileFromSupabase(
-    user
-  ) {
-
-    if (!supabaseClient) {
-      return;
-    }
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from(
-            "profiles"
-          )
-          .select("*")
-          .eq(
-            "id",
-            user.id
-          )
-          .maybeSingle();
-
-
-      if (error) {
-
-        console.warn(
-          "Profile load:",
-          error
-        );
-
-        return;
-
-      }
-
-
-      if (!data) {
-        return;
-      }
-
-
-      userData.name =
-        data.full_name ||
-        userData.name ||
-        "";
-
-
-      userData.birthDate =
-        data.birth_date ||
-        userData.birthDate ||
-        "";
-
-
-      userData.gender =
-        data.gender ||
-        userData.gender ||
-        "";
-
-
-      userData.height =
-        data.height ||
-        userData.height ||
-        "";
-
-
-      userData.weight =
-        data.weight ||
-        userData.weight ||
-        "";
-
-
-      userData.goal =
-        data.goal ||
-        userData.goal ||
-        "";
-
-
-      userData.activity =
-        data.activity ||
-        userData.activity ||
-        "";
-
-
-      userData.likedFoods =
-        data.liked_foods ||
-        "";
-
-
-      userData.dislikedFoods =
-        data.disliked_foods ||
-        "";
-
-
-      userData.allergies =
-        data.allergies ||
-        "";
-
-
-      userData.mealsPerDay =
-        data.meals_per_day ||
-        4;
-
-
-      userData.profileCompleted =
-        Boolean(
-
-          data.full_name &&
-
-          data.birth_date &&
-
-          data.height &&
-
-          data.weight &&
-
-          data.goal &&
-
-          data.activity
-
-        );
+      userData.paymentSubmittedAt =
+        new Date()
+          .toISOString();
 
 
       saveLocalData();
 
+
+      if (proMessage) {
+
+        proMessage.textContent =
+```
+
+`✅ تم إرسال طلب الدفع بنجاح.
+
+سيتم مراجعة التحويل من الإدارة.
+
+بعد الموافقة سيتم تفعيل PRO.`;
+
+```
+      }
+
+
+      confirmPaymentBtn.textContent =
+        "تم إرسال الطلب ✓";
+
+
+      showMessage(
+        "تم إرسال طلب PRO للإدارة",
+        "success"
+      );
+
+
     } catch (error) {
 
-      console.warn(
-        "Profile error:",
+      console.error(
+        "Payment error:",
         error
       );
 
-    }
 
-  }
-
-
-  // =========================================================
-  // DATE
-  // =========================================================
-
-  function updateDate() {
-
-    const now =
-      new Date();
-
-    const text =
-      now.toLocaleDateString(
-        "ar-EG",
-        {
-
-          weekday:
-            "long",
-
-          year:
-            "numeric",
-
-          month:
-            "long",
-
-          day:
-            "numeric"
-
-        }
-      );
-
-    safeText(
-      "#todayText",
-      text
-    );
-
-  }
+      confirmPaymentBtn.disabled =
+        false;
 
 
-  // =========================================================
-  // PROFILE LIVE CALCULATION
-  // =========================================================
+      confirmPaymentBtn.textContent =
+        "تأكيد الدفع";
 
-  [
-    "#weight",
-    "#height",
-    "#birthDate",
-    "#gender",
-    "#goal",
-    "#activity"
-  ].forEach(
-    (selector) => {
-
-      const element =
-        $(selector);
-
-      if (!element) {
-        return;
-      }
-
-      element.addEventListener(
-        "input",
-        () => {
-          updateDashboard();
-        }
-      );
-
-      element.addEventListener(
-        "change",
-        () => {
-          updateDashboard();
-        }
-      );
-
-    }
-  );
-
-
-  // =========================================================
-  // AUTH SWITCH
-  // =========================================================
-
-  $("#showSignup")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        $("#loginBox")
-          ?.classList.add(
-            "hidden"
-          );
-
-        $("#signupBox")
-          ?.classList.remove(
-            "hidden"
-          );
-
-      }
-    );
-
-
-  $("#showLogin")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        $("#signupBox")
-          ?.classList.add(
-            "hidden"
-          );
-
-        $("#loginBox")
-          ?.classList.remove(
-            "hidden"
-          );
-
-      }
-    );
-
-
-  // =========================================================
-  // ADMIN PANEL
-  // =========================================================
-
-  async function openAdminPanel() {
-
-    if (
-      !supabaseClient
-    ) {
-      return;
-    }
-
-    const {
-      data: sessionData
-    } =
-      await supabaseClient.auth
-        .getSession();
-
-    const user =
-      sessionData
-        ?.session
-        ?.user;
-
-    if (!user) {
-      return;
-    }
-
-    if (
-      user.email
-        ?.toLowerCase() !==
-      ADMIN_EMAIL
-        .toLowerCase()
-    ) {
 
       showMessage(
-        "غير مسموح لك بالدخول",
+        error.message ||
+        "حدث خطأ غير متوقع",
+        "error"
+      );
+
+    }
+
+  }
+);
+```
+
+}
+
+/* =====================================================
+SIGN UP
+===================================================== */
+
+$("#signupForm")
+?.addEventListener(
+"submit",
+async event => {
+
+```
+    event.preventDefault();
+
+
+    if (!supabaseClient) {
+
+      showMessage(
+        "Supabase غير متصل",
         "error"
       );
 
@@ -3212,29 +2467,45 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
-    showScreen(
-      "adminScreen"
-    );
 
-    await loadAdminRequests();
-
-  }
+    const email =
+      $("#signupEmail")
+        ?.value
+        ?.trim();
 
 
-  async function loadAdminRequests() {
+    const password =
+      $("#signupPassword")
+        ?.value;
 
-    const list =
-      $("#adminRequests");
 
-    if (!list) {
+    if (
+      !email ||
+      !password
+    ) {
+
+      showMessage(
+        "اكتب البريد وكلمة المرور",
+        "error"
+      );
+
       return;
+
     }
 
-    list.innerHTML = `
-      <div class="empty-state">
-        جاري تحميل الطلبات...
-      </div>
-    `;
+
+    if (
+      password.length < 6
+    ) {
+
+      showMessage(
+        "كلمة المرور لازم تكون 6 حروف أو أكثر",
+        "error"
+      );
+
+      return;
+
+    }
 
 
     const {
@@ -3242,310 +2513,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       error
     } =
       await supabaseClient
-        .from(
-          "payment_requests"
-        )
-        .select(
-          "*"
-        )
-        .order(
-          "created_at",
-          {
-            ascending:
-              false
-          }
-        );
+        .auth
+        .signUp({
 
+          email,
 
-    if (error) {
+          password
 
-      console.error(
-        error
-      );
-
-      list.innerHTML = `
-        <div class="admin-error">
-          فشل تحميل الطلبات
-          <br>
-          ${escapeHTML(
-            error.message
-          )}
-        </div>
-      `;
-
-      return;
-
-    }
-
-
-    if (!data?.length) {
-
-      list.innerHTML = `
-        <div class="empty-state">
-          مفيش طلبات دفع حاليا
-        </div>
-      `;
-
-      return;
-
-    }
-
-
-    list.innerHTML =
-      data
-        .map(
-          (request) => {
-
-            const status =
-              request.status ||
-              "pending";
-
-            const date =
-              request.created_at
-                ? new Date(
-                    request.created_at
-                  ).toLocaleString(
-                    "ar-EG"
-                  )
-                : "غير معروف";
-
-
-            return `
-
-              <div
-                class="admin-request"
-                data-id="${escapeHTML(
-                  request.id
-                )}"
-              >
-
-                <div
-                  class="admin-request-header"
-                >
-
-                  <div>
-
-                    <span
-                      class="small-label"
-                    >
-                      PAYMENT REQUEST
-                    </span>
-
-                    <h3>
-                      طلب PRO
-                    </h3>
-
-                  </div>
-
-                  <span
-                    class="
-                      status-badge
-                      status-${escapeHTML(
-                        status
-                      )}
-                    "
-                  >
-                    ${status === "pending"
-                      ? "قيد المراجعة"
-                      : status === "approved"
-                      ? "مقبول"
-                      : status === "rejected"
-                      ? "مرفوض"
-                      : escapeHTML(status)}
-                  </span>
-
-                </div>
-
-
-                <div
-                  class="admin-info"
-                >
-
-                  <div>
-                    <span>المستخدم</span>
-                    <strong>
-                      ${escapeHTML(
-                        request.user_id
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>المبلغ</span>
-                    <strong>
-                      ${escapeHTML(
-                        request.amount
-                      )} جنيه
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>طريقة الدفع</span>
-                    <strong>
-                      ${escapeHTML(
-                        request.payment_method
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>التاريخ</span>
-                    <strong>
-                      ${escapeHTML(
-                        date
-                      )}
-                    </strong>
-                  </div>
-
-                </div>
-
-
-                ${
-                  request.screenshot_url
-                    ? `
-                      <a
-                        href="${escapeHTML(
-                          request.screenshot_url
-                        )}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="screenshot-btn"
-                      >
-                        🖼️ فتح صورة التحويل
-                      </a>
-                    `
-                    : ""
-                }
-
-
-                <div
-                  class="admin-actions"
-                >
-
-                  <button
-                    class="approve-btn"
-                    data-action="approve"
-                    data-id="${escapeHTML(
-                      request.id
-                    )}"
-                    ${
-                      status === "approved"
-                        ? "disabled"
-                        : ""
-                    }
-                  >
-                    ✅ موافقة
-                  </button>
-
-                  <button
-                    class="reject-btn"
-                    data-action="reject"
-                    data-id="${escapeHTML(
-                      request.id
-                    )}"
-                    ${
-                      status === "rejected"
-                        ? "disabled"
-                        : ""
-                    }
-                  >
-                    ❌ رفض
-                  </button>
-
-                </div>
-
-              </div>
-
-            `;
-
-          }
-        )
-        .join("");
-
-
-    $$(".approve-btn")
-      .forEach(
-        (button) => {
-
-          button.addEventListener(
-            "click",
-            async () => {
-
-              await updatePaymentStatus(
-                button.dataset.id,
-                "approved"
-              );
-
-            }
-          );
-
-        }
-      );
-
-
-    $$(".reject-btn")
-      .forEach(
-        (button) => {
-
-          button.addEventListener(
-            "click",
-            async () => {
-
-              await updatePaymentStatus(
-                button.dataset.id,
-                "rejected"
-              );
-
-            }
-          );
-
-        }
-      );
-
-  }
-
-
-  async function updatePaymentStatus(
-    id,
-    status
-  ) {
-
-    if (
-      !id ||
-      !supabaseClient
-    ) {
-      return;
-    }
-
-    const note =
-      status === "approved"
-        ? "تمت الموافقة على الدفع"
-        : "تم رفض طلب الدفع";
-
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from(
-          "payment_requests"
-        )
-        .update({
-
-          status,
-
-          admin_note:
-            note,
-
-          reviewed_at:
-            new Date()
-              .toISOString()
-
-        })
-        .eq(
-          "id",
-          id
-        );
+        });
 
 
     if (error) {
@@ -3555,7 +2530,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       showMessage(
-        "فشل تحديث الطلب: " +
         error.message,
         "error"
       );
@@ -3565,66 +2539,562 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
+    if (
+      data?.session
+    ) {
+
+      showMessage(
+        "تم إنشاء الحساب وتسجيل الدخول",
+        "success"
+      );
+
+      await loadCurrentUser();
+
+    } else {
+
+      showMessage(
+        "تم إنشاء الحساب. راجع الإيميل لتأكيد الحساب ثم سجل الدخول.",
+        "success"
+      );
+
+
+      $("#signupBox")
+        ?.classList.add(
+          "hidden"
+        );
+
+
+      $("#loginBox")
+        ?.classList.remove(
+          "hidden"
+        );
+
+    }
+
+  }
+);
+```
+
+/* =====================================================
+LOGIN
+===================================================== */
+
+$("#loginForm")
+?.addEventListener(
+"submit",
+async event => {
+
+```
+    event.preventDefault();
+
+
+    if (!supabaseClient) {
+
+      showMessage(
+        "Supabase غير متصل",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const email =
+      $("#loginEmail")
+        ?.value
+        ?.trim();
+
+
+    const password =
+      $("#loginPassword")
+        ?.value;
+
+
+    if (
+      !email ||
+      !password
+    ) {
+
+      showMessage(
+        "اكتب البريد وكلمة المرور",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .signInWithPassword({
+
+          email,
+
+          password
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        error
+      );
+
+      showMessage(
+        error.message,
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if (!data?.session) {
+
+      showMessage(
+        "لم يتم إنشاء جلسة دخول",
+        "error"
+      );
+
+      return;
+
+    }
+
+
     showMessage(
-      status === "approved"
-        ? "تمت الموافقة وتفعيل الطلب"
-        : "تم رفض الطلب",
+      "تم تسجيل الدخول بنجاح",
       "success"
     );
 
 
-    await loadAdminRequests();
+    await loadCurrentUser();
+
+  }
+);
+```
+
+/* =====================================================
+LOGOUT
+===================================================== */
+
+$("#logoutBtn")
+?.addEventListener(
+"click",
+async () => {
+
+```
+    if (supabaseClient) {
+
+      await supabaseClient
+        .auth
+        .signOut();
+
+    }
+
+
+    userData = {};
+
+
+    localStorage.removeItem(
+      STORAGE_KEY
+    );
+
+
+    showScreen(
+      "authScreen"
+    );
+
+
+    showMessage(
+      "تم تسجيل الخروج",
+      "success"
+    );
+
+  }
+);
+```
+
+/* =====================================================
+LOAD CURRENT USER
+===================================================== */
+
+async function loadCurrentUser() {
+
+```
+if (!supabaseClient) {
+
+  if (
+    userData.profileCompleted
+  ) {
+
+    showDashboard();
+
+  } else {
+
+    showScreen(
+      "authScreen"
+    );
+
+  }
+
+  return;
+
+}
+
+
+try {
+
+  const {
+    data: sessionData
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  const session =
+    sessionData?.session;
+
+
+  if (!session) {
+
+    showScreen(
+      "authScreen"
+    );
+
+    return;
 
   }
 
 
-  $("#adminBtn")
-    ?.addEventListener(
-      "click",
-      async () => {
-
-        await openAdminPanel();
-
-      }
-    );
+  const user =
+    session.user;
 
 
-  $("#backDashboardBtn")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        showDashboard();
-
-      }
-    );
-
-
-  $("#refreshAdminBtn")
-    ?.addEventListener(
-      "click",
-      async () => {
-
-        await loadAdminRequests();
-
-      }
-    );
-
-
-  // =========================================================
-  // INITIAL
-  // =========================================================
-
-  loadProfileInputs();
-
-  updateDate();
-
-  updateDashboard();
-
-  await loadCurrentUser();
-
-  console.log(
-    "dr.elorabi application loaded successfully."
+  await loadProfileFromSupabase(
+    user
   );
+
+
+  if (
+    userData.profileCompleted
+  ) {
+
+    showDashboard();
+
+  } else {
+
+    showProfile();
+
+  }
+
+
+} catch (error) {
+
+  console.error(
+    error
+  );
+
+
+  if (
+    userData.profileCompleted
+  ) {
+
+    showDashboard();
+
+  } else {
+
+    showScreen(
+      "authScreen"
+    );
+
+  }
+
+}
+```
+
+}
+
+/* =====================================================
+LOAD PROFILE
+===================================================== */
+
+async function loadProfileFromSupabase(
+user
+) {
+
+```
+if (!supabaseClient) {
+  return;
+}
+
+
+try {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq(
+        "id",
+        user.id
+      )
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.warn(
+      "Profile load:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  if (!data) {
+    return;
+  }
+
+
+  userData.name =
+    data.full_name ||
+    userData.name ||
+    "";
+
+
+  userData.birthDate =
+    data.birth_date ||
+    userData.birthDate ||
+    "";
+
+
+  userData.gender =
+    data.gender ||
+    userData.gender ||
+    "";
+
+
+  userData.height =
+    data.height ||
+    userData.height ||
+    "";
+
+
+  userData.weight =
+    data.weight ||
+    userData.weight ||
+    "";
+
+
+  userData.goal =
+    data.goal ||
+    userData.goal ||
+    "";
+
+
+  userData.activity =
+    data.activity ||
+    userData.activity ||
+    "";
+
+
+  userData.likedFoods =
+    data.liked_foods ||
+    "";
+
+
+  userData.dislikedFoods =
+    data.disliked_foods ||
+    "";
+
+
+  userData.allergies =
+    data.allergies ||
+    "";
+
+
+  userData.mealsPerDay =
+    data.meals_per_day ||
+    4;
+
+
+  userData.profileCompleted =
+    Boolean(
+
+      data.full_name &&
+      data.birth_date &&
+      data.height &&
+      data.weight &&
+      data.goal &&
+      data.activity
+
+    );
+
+
+  saveLocalData();
+
+
+} catch (error) {
+
+  console.warn(
+    "Profile error:",
+    error
+  );
+
+}
+```
+
+}
+
+/* =====================================================
+DATE
+===================================================== */
+
+function updateDate() {
+
+```
+const now =
+  new Date();
+
+
+const text =
+  now.toLocaleDateString(
+    "ar-EG",
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }
+  );
+
+
+safeText(
+  "#todayText",
+  text
+);
+```
+
+}
+
+/* =====================================================
+LIVE CALCULATION
+===================================================== */
+
+[
+"#weight",
+"#height",
+"#birthDate",
+"#gender",
+"#goal",
+"#activity"
+]
+.forEach(
+selector => {
+
+```
+    const element =
+      $(selector);
+
+
+    if (!element) {
+      return;
+    }
+
+
+    element.addEventListener(
+      "input",
+      () => {
+        updateDashboard();
+      }
+    );
+
+
+    element.addEventListener(
+      "change",
+      () => {
+        updateDashboard();
+      }
+    );
+
+  }
+);
+```
+
+/* =====================================================
+AUTH SWITCH
+===================================================== */
+
+$("#showSignup")
+?.addEventListener(
+"click",
+() => {
+
+```
+    $("#loginBox")
+      ?.classList.add(
+        "hidden"
+      );
+
+
+    $("#signupBox")
+      ?.classList.remove(
+        "hidden"
+      );
+
+  }
+);
+```
+
+$("#showLogin")
+?.addEventListener(
+"click",
+() => {
+
+```
+    $("#signupBox")
+      ?.classList.add(
+        "hidden"
+      );
+
+
+    $("#loginBox")
+      ?.classList.remove(
+        "hidden"
+      );
+
+  }
+);
+```
+
+/* =====================================================
+INITIAL
+===================================================== */
+
+loadProfileInputs();
+
+updateDate();
+
+updateDashboard();
+
+await loadCurrentUser();
+
+console.log(
+"dr.elorabi application loaded successfully."
+);
 
 });
