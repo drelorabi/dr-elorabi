@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>dr.elorabi</title>
 
-  <meta name="description"
-        content="dr.elorabi - Personal Health, Fitness & Nutrition">
+  <meta
+    name="description"
+    content="dr.elorabi - Personal Health, Fitness & Nutrition"
+  >
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -44,7 +47,9 @@
 
         <form id="loginForm">
 
-          <label>البريد الالكتروني</label>
+          <label>
+            البريد الالكتروني
+          </label>
 
           <input
             id="loginEmail"
@@ -53,7 +58,9 @@
             required
           >
 
-          <label>كلمة المرور</label>
+          <label>
+            كلمة المرور
+          </label>
 
           <input
             id="loginPassword"
@@ -62,7 +69,10 @@
             required
           >
 
-          <button type="submit" class="primary-btn">
+          <button
+            type="submit"
+            class="primary-btn"
+          >
             تسجيل الدخول
           </button>
 
@@ -70,7 +80,12 @@
 
         <p class="switch-text">
           لسه جديد؟
-          <button id="showSignup" class="link-btn">
+
+          <button
+            id="showSignup"
+            type="button"
+            class="link-btn"
+          >
             اعمل حساب
           </button>
         </p>
@@ -80,9 +95,14 @@
 
       <!-- SIGN UP -->
 
-      <div id="signupBox" class="auth-box hidden">
+      <div
+        id="signupBox"
+        class="auth-box hidden"
+      >
 
-        <h2>اعمل حسابك</h2>
+        <h2>
+          اعمل حسابك
+        </h2>
 
         <p class="muted">
           بياناتك هتتحفظ بشكل امن في حسابك
@@ -90,7 +110,9 @@
 
         <form id="signupForm">
 
-          <label>البريد الالكتروني</label>
+          <label>
+            البريد الالكتروني
+          </label>
 
           <input
             id="signupEmail"
@@ -99,7 +121,9 @@
             required
           >
 
-          <label>كلمة المرور</label>
+          <label>
+            كلمة المرور
+          </label>
 
           <input
             id="signupPassword"
@@ -109,7 +133,10 @@
             required
           >
 
-          <button type="submit" class="primary-btn">
+          <button
+            type="submit"
+            class="primary-btn"
+          >
             انشاء الحساب
           </button>
 
@@ -117,7 +144,12 @@
 
         <p class="switch-text">
           عندك حساب؟
-          <button id="showLogin" class="link-btn">
+
+          <button
+            id="showLogin"
+            type="button"
+            class="link-btn"
+          >
             تسجيل الدخول
           </button>
         </p>
@@ -133,13 +165,23 @@
          PROFILE SCREEN
     ========================== -->
 
-    <section id="profileScreen" class="screen hidden">
+    <section
+      id="profileScreen"
+      class="screen hidden"
+    >
 
       <div class="topbar">
 
         <div>
-          <span class="small-label">dr.elorabi</span>
-          <h2>خلينا نعرفك اكتر</h2>
+
+          <span class="small-label">
+            dr.elorabi
+          </span>
+
+          <h2>
+            خلينا نعرفك اكتر
+          </h2>
+
         </div>
 
       </div>
@@ -147,11 +189,15 @@
 
       <div class="card">
 
-        <h3>بياناتك الاساسية</h3>
+        <h3>
+          بياناتك الاساسية
+        </h3>
 
         <form id="profileForm">
 
-          <label>الاسم</label>
+          <label>
+            الاسم
+          </label>
 
           <input
             id="fullName"
@@ -161,7 +207,9 @@
           >
 
 
-          <label>تاريخ الميلاد</label>
+          <label>
+            تاريخ الميلاد
+          </label>
 
           <input
             id="birthDate"
@@ -170,9 +218,14 @@
           >
 
 
-          <label>النوع</label>
+          <label>
+            النوع
+          </label>
 
-          <select id="gender" required>
+          <select
+            id="gender"
+            required
+          >
 
             <option value="">
               اختار
@@ -197,7 +250,9 @@
 
             <div>
 
-              <label>الطول سم</label>
+              <label>
+                الطول سم
+              </label>
 
               <input
                 id="height"
@@ -210,9 +265,12 @@
 
             </div>
 
+
             <div>
 
-              <label>الوزن كجم</label>
+              <label>
+                الوزن كجم
+              </label>
 
               <input
                 id="weight"
@@ -229,9 +287,14 @@
           </div>
 
 
-          <label>هدفك ايه؟</label>
+          <label>
+            هدفك ايه؟
+          </label>
 
-          <select id="goal" required>
+          <select
+            id="goal"
+            required
+          >
 
             <option value="">
               اختار هدفك
@@ -256,9 +319,14 @@
           </select>
 
 
-          <label>مستوى نشاطك</label>
+          <label>
+            مستوى نشاطك
+          </label>
 
-          <select id="activity" required>
+          <select
+            id="activity"
+            required
+          >
 
             <option value="">
               اختار
@@ -323,7 +391,10 @@
               3 وجبات
             </option>
 
-            <option value="4" selected>
+            <option
+              value="4"
+              selected
+            >
               4 وجبات
             </option>
 
@@ -356,7 +427,10 @@
          DASHBOARD
     ========================== -->
 
-    <section id="dashboardScreen" class="screen hidden">
+    <section
+      id="dashboardScreen"
+      class="screen hidden"
+    >
 
       <header class="dashboard-header">
 
@@ -367,19 +441,24 @@
           </span>
 
           <h1>
+
             <span id="welcomeName">
               اهلا بيك
             </span>
+
             👋
+
           </h1>
 
           <p id="todayText"></p>
 
         </div>
 
+
         <button
           id="logoutBtn"
           class="logout-btn"
+          type="button"
         >
           خروج
         </button>
@@ -393,46 +472,60 @@
 
         <div class="stat-card">
 
-          <span>السعرات</span>
+          <span>
+            السعرات
+          </span>
 
           <strong id="calorieTarget">
             0
           </strong>
 
-          <small>kcal</small>
+          <small>
+            kcal
+          </small>
 
         </div>
 
 
         <div class="stat-card">
 
-          <span>البروتين</span>
+          <span>
+            البروتين
+          </span>
 
           <strong id="proteinTarget">
             0
           </strong>
 
-          <small>g</small>
+          <small>
+            g
+          </small>
 
         </div>
 
 
         <div class="stat-card">
 
-          <span>المياه</span>
+          <span>
+            المياه
+          </span>
 
           <strong id="waterTarget">
             0
           </strong>
 
-          <small>ml</small>
+          <small>
+            ml
+          </small>
 
         </div>
 
 
         <div class="stat-card">
 
-          <span>BMI</span>
+          <span>
+            BMI
+          </span>
 
           <strong id="bmiValue">
             0
@@ -454,6 +547,7 @@
         <div class="section-title">
 
           <div>
+
             <span class="small-label">
               TODAY
             </span>
@@ -461,6 +555,7 @@
             <h2>
               يومك
             </h2>
+
           </div>
 
         </div>
@@ -475,16 +570,21 @@
             </span>
 
             <strong>
+
               <span id="caloriesConsumed">
                 0
               </span>
+
               /
+
               <span id="caloriesGoal">
                 0
               </span>
+
             </strong>
 
           </div>
+
 
           <div class="progress">
 
@@ -507,17 +607,23 @@
             </span>
 
             <strong>
+
               <span id="proteinConsumed">
                 0
               </span>
+
               /
+
               <span id="proteinGoal">
                 0
               </span>
+
               g
+
             </strong>
 
           </div>
+
 
           <div class="progress">
 
@@ -540,6 +646,7 @@
         <button
           class="action-card"
           id="logFoodBtn"
+          type="button"
         >
 
           <span class="action-icon">
@@ -560,6 +667,7 @@
         <button
           class="action-card"
           id="waterBtn"
+          type="button"
         >
 
           <span class="action-icon">
@@ -580,6 +688,7 @@
         <button
           class="action-card"
           id="sleepBtn"
+          type="button"
         >
 
           <span class="action-icon">
@@ -600,6 +709,7 @@
         <button
           class="action-card"
           id="exerciseBtn"
+          type="button"
         >
 
           <span class="action-icon">
@@ -626,6 +736,7 @@
         <div class="section-title">
 
           <div>
+
             <span class="small-label">
               NUTRITION
             </span>
@@ -633,9 +744,11 @@
             <h2>
               اكل النهارده
             </h2>
+
           </div>
 
         </div>
+
 
         <div id="foodList">
 
@@ -655,6 +768,7 @@
         <div class="section-title">
 
           <div>
+
             <span class="small-label">
               HYDRATION
             </span>
@@ -666,6 +780,7 @@
           </div>
 
         </div>
+
 
         <div class="water-counter">
 
@@ -679,9 +794,11 @@
 
         </div>
 
+
         <button
           id="addWaterBtn"
           class="primary-btn"
+          type="button"
         >
           + 250 ml
         </button>
@@ -709,7 +826,11 @@
 
         </div>
 
-        <button id="proBtn">
+
+        <button
+          id="proBtn"
+          type="button"
+        >
           اشترك
         </button>
 
@@ -733,6 +854,7 @@
         <button
           class="close-modal"
           data-close="foodModal"
+          type="button"
         >
           ×
         </button>
@@ -745,6 +867,7 @@
           اكتب الوجبة والكمية، وهنحسبها
         </p>
 
+
         <form id="foodForm">
 
           <label>
@@ -754,9 +877,10 @@
           <input
             id="foodName"
             type="text"
-            placeholder="مثلا: 200 جرام فراخ + 150 جرام رز"
+            placeholder="مثلا: فراخ"
             required
           >
+
 
           <label>
             النوع
@@ -813,6 +937,7 @@
             required
           >
 
+
           <button
             type="submit"
             class="primary-btn"
@@ -841,6 +966,7 @@
         <button
           class="close-modal"
           data-close="sleepModal"
+          type="button"
         >
           ×
         </button>
@@ -848,6 +974,7 @@
         <h2>
           النوم 😴
         </h2>
+
 
         <form id="sleepForm">
 
@@ -861,6 +988,7 @@
             required
           >
 
+
           <label>
             وقت الصحيان
           </label>
@@ -871,6 +999,7 @@
             required
           >
 
+
           <button
             type="submit"
             class="primary-btn"
@@ -879,6 +1008,7 @@
           </button>
 
         </form>
+
 
         <div id="sleepResult"></div>
 
@@ -901,6 +1031,7 @@
         <button
           class="close-modal"
           data-close="exerciseModal"
+          type="button"
         >
           ×
         </button>
@@ -908,6 +1039,7 @@
         <h2>
           سجل تمرينك 🏋️
         </h2>
+
 
         <form id="exerciseForm">
 
@@ -922,6 +1054,7 @@
             required
           >
 
+
           <label>
             المدة بالدقائق
           </label>
@@ -934,6 +1067,7 @@
             required
           >
 
+
           <label>
             السعرات المحروقة
           </label>
@@ -945,6 +1079,7 @@
             placeholder="300"
             required
           >
+
 
           <button
             type="submit"
@@ -974,22 +1109,29 @@
         <button
           class="close-modal"
           data-close="proModal"
+          type="button"
         >
           ×
         </button>
+
 
         <span class="pro-badge">
           PRO
         </span>
 
+
         <h2>
           dr.elorabi PRO
         </h2>
 
+
         <div class="price">
           50 جنيه
-          <small>/ شهر</small>
+          <small>
+            / شهر
+          </small>
         </div>
+
 
         <ul class="feature-list">
 
@@ -1019,14 +1161,119 @@
 
         </ul>
 
+
+        <!-- =========================
+             REQUEST PRO
+        ========================== -->
+
         <button
           id="requestProBtn"
           class="primary-btn"
+          type="button"
         >
           طلب تفعيل PRO
         </button>
 
-        <p id="proMessage"></p>
+
+        <!-- =========================
+             PAYMENT AREA
+        ========================== -->
+
+        <div
+          id="proPaymentArea"
+          class="hidden"
+          style="margin-top:20px;"
+        >
+
+          <div
+            id="proMessage"
+            class="message"
+            style="white-space:pre-line;"
+          ></div>
+
+
+          <!-- PAYMENT LINK -->
+
+          <a
+            id="paymentLink"
+            class="primary-btn"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="
+              display:none;
+              text-decoration:none;
+              text-align:center;
+              margin-top:15px;
+            "
+          >
+            💳 ادفع 50 جنيه
+          </a>
+
+
+          <!-- SCREENSHOT -->
+
+          <div style="margin-top:20px;">
+
+            <label
+              for="paymentScreenshot"
+              style="display:block;margin-bottom:8px;"
+            >
+              صورة التحويل
+            </label>
+
+
+            <input
+              id="paymentScreenshot"
+              type="file"
+              accept="image/*"
+              style="display:none;"
+            >
+
+
+            <label
+              for="paymentScreenshot"
+              class="primary-btn"
+              style="
+                display:block;
+                text-align:center;
+                cursor:pointer;
+              "
+            >
+              📷 اختار صورة التحويل
+            </label>
+
+
+            <small
+              style="
+                display:block;
+                margin-top:8px;
+                opacity:.7;
+              "
+            >
+              PNG / JPG - بحد اقصى 5MB
+            </small>
+
+          </div>
+
+
+          <!-- CONFIRM -->
+
+          <button
+            id="confirmPaymentBtn"
+            class="primary-btn"
+            type="button"
+            style="
+              display:none;
+              margin-top:15px;
+            "
+          >
+            تأكيد الدفع
+          </button>
+
+
+        </div>
+
 
       </div>
 
@@ -1036,13 +1283,21 @@
   </div>
 
 
-  <!-- SUPABASE -->
+  <!-- =========================
+       SUPABASE
+  ========================== -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
+
+  <!-- =========================
+       APP JS
+  ========================== -->
+
   <script src="app.js"></script>
 
 </body>
+
 </html>
