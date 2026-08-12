@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+
   // =========================================================
   // SUPABASE
   // =========================================================
@@ -18,18 +19,21 @@ document.addEventListener("DOMContentLoaded", () => {
         SUPABASE_KEY
       );
     } catch (error) {
-      console.error("Supabase error:", error);
+      console.error("Supabase initialization error:", error);
     }
   }
+
 
   // =========================================================
   // HELPERS
   // =========================================================
 
-  const $ = (selector) => document.querySelector(selector);
+  const $ = (selector) =>
+    document.querySelector(selector);
 
   const $$ = (selector) =>
     Array.from(document.querySelectorAll(selector));
+
 
   function safeText(selector, value) {
     const element = $(selector);
@@ -39,21 +43,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
   function getNumber(selector, fallback = 0) {
     const element = $(selector);
 
-    if (!element) return fallback;
+    if (!element) {
+      return fallback;
+    }
 
     const value = Number(element.value);
 
-    return Number.isFinite(value) ? value : fallback;
+    return Number.isFinite(value)
+      ? value
+      : fallback;
   }
 
+
   function showMessage(message, type = "info") {
+
     let box = $("#appMessage");
 
     if (!box) {
+
       box = document.createElement("div");
+
       box.id = "appMessage";
 
       Object.assign(box.style, {
@@ -90,7 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 4000);
   }
 
+
   function showScreen(id) {
+
     $$(".screen").forEach((screen) => {
       screen.classList.add("hidden");
     });
@@ -102,74 +117,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
   function todayKey() {
+
     const now = new Date();
 
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
+    const year =
+      now.getFullYear();
+
+    const month =
+      String(now.getMonth() + 1)
+        .padStart(2, "0");
+
+    const day =
+      String(now.getDate())
+        .padStart(2, "0");
 
     return `${year}-${month}-${day}`;
   }
+
 
   // =========================================================
   // LOCAL DATA
   // =========================================================
 
-  const STORAGE_KEY = "dr_elorabi_user";
+  const STORAGE_KEY =
+    "dr_elorabi_user";
 
   let userData = {};
 
   try {
-    userData = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) || "{}"
-    );
+
+    userData =
+      JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || "{}"
+      );
+
   } catch {
+
     userData = {};
+
   }
 
+
   function saveLocalData() {
+
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(userData)
     );
+
   }
 
-  // =========================================================
-  // AUTH SCREEN SWITCH
-  // =========================================================
-
-  const showSignup = $("#showSignup");
-  const showLogin = $("#showLogin");
-
-  if (showSignup) {
-    showSignup.addEventListener("click", () => {
-      $("#loginBox")?.classList.add("hidden");
-      $("#signupBox")?.classList.remove("hidden");
-    });
-  }
-
-  if (showLogin) {
-    showLogin.addEventListener("click", () => {
-      $("#signupBox")?.classList.add("hidden");
-      $("#loginBox")?.classList.remove("hidden");
-    });
-  }
 
   // =========================================================
   // AGE
   // =========================================================
 
   function calculateAge(dateString) {
-    if (!dateString) return 0;
 
-    const birth = new Date(dateString);
+    if (!dateString) {
+      return 0;
+    }
+
+    const birth =
+      new Date(dateString);
 
     if (Number.isNaN(birth.getTime())) {
       return 0;
     }
 
-    const today = new Date();
+    const today =
+      new Date();
 
     let age =
       today.getFullYear() -
@@ -192,25 +211,40 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(0, age);
   }
 
+
   // =========================================================
   // BMI
   // =========================================================
 
   function calculateBMI() {
-    const weight = getNumber("#weight");
-    const height = getNumber("#height");
 
-    if (weight <= 0 || height <= 0) {
+    const weight =
+      userData.weight ||
+      getNumber("#weight");
+
+    const height =
+      userData.height ||
+      getNumber("#height");
+
+    if (
+      weight <= 0 ||
+      height <= 0
+    ) {
       return 0;
     }
 
-    const heightMeters = height / 100;
+    const heightMeters =
+      height / 100;
 
-    return weight /
-      (heightMeters * heightMeters);
+    return (
+      weight /
+      (heightMeters * heightMeters)
+    );
   }
 
+
   function bmiStatus(bmi) {
+
     if (bmi < 18.5) {
       return "نقص وزن";
     }
@@ -226,12 +260,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return "سمنة";
   }
 
+
   // =========================================================
   // CALORIES
   // =========================================================
 
   function getActivityMultiplier() {
-    const activity = $("#activity")?.value;
+
+    const activity =
+      userData.activity ||
+      $("#activity")?.value;
 
     const values = {
       sedentary: 1.2,
@@ -243,14 +281,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return values[activity] || 1.2;
   }
 
-  function calculateCalories() {
-    const weight = getNumber("#weight");
-    const height = getNumber("#height");
-    const birthDate = $("#birthDate")?.value || "";
-    const gender = $("#gender")?.value || "male";
-    const goal = $("#goal")?.value || "maintenance";
 
-    const age = calculateAge(birthDate);
+  function calculateCalories() {
+
+    const weight =
+      userData.weight ||
+      getNumber("#weight");
+
+    const height =
+      userData.height ||
+      getNumber("#height");
+
+    const birthDate =
+      userData.birthDate ||
+      $("#birthDate")?.value ||
+      "";
+
+    const gender =
+      userData.gender ||
+      $("#gender")?.value ||
+      "male";
+
+    const goal =
+      userData.goal ||
+      $("#goal")?.value ||
+      "maintenance";
+
+    const age =
+      calculateAge(birthDate);
 
     if (
       weight <= 0 ||
@@ -263,41 +321,46 @@ document.addEventListener("DOMContentLoaded", () => {
     let bmr;
 
     if (gender === "female") {
+
       bmr =
         (10 * weight) +
         (6.25 * height) -
         (5 * age) -
         161;
+
     } else {
+
       bmr =
         (10 * weight) +
         (6.25 * height) -
         (5 * age) +
         5;
+
     }
 
     const maintenance =
       bmr * getActivityMultiplier();
 
-    let calories = maintenance;
+    let calories =
+      maintenance;
 
     if (goal === "fat_loss") {
-      calories = maintenance - 400;
+      calories =
+        maintenance - 400;
     }
 
     if (goal === "muscle_gain") {
-      calories = maintenance + 250;
+      calories =
+        maintenance + 250;
     }
 
     if (goal === "recomposition") {
-      calories = maintenance - 150;
+      calories =
+        maintenance - 150;
     }
 
-    if (goal === "maintenance") {
-      calories = maintenance;
-    }
-
-    calories = Math.max(1200, calories);
+    calories =
+      Math.max(1200, calories);
 
     const protein =
       Math.round(weight * 1.8);
@@ -315,18 +378,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+
   // =========================================================
   // DAILY DATA
   // =========================================================
 
   function getTodayData() {
-    const key = todayKey();
+
+    const key =
+      todayKey();
 
     if (!userData.daily) {
       userData.daily = {};
     }
 
     if (!userData.daily[key]) {
+
       userData.daily[key] = {
         calories: 0,
         protein: 0,
@@ -335,21 +402,28 @@ document.addEventListener("DOMContentLoaded", () => {
         exercises: [],
         sleep: null
       };
+
     }
 
     return userData.daily[key];
   }
 
+
   // =========================================================
-  // UPDATE DASHBOARD
+  // DASHBOARD
   // =========================================================
 
   function updateDashboard() {
-    const result = calculateCalories();
 
-    if (!result) return;
+    const result =
+      calculateCalories();
 
-    const today = getTodayData();
+    if (!result) {
+      return;
+    }
+
+    const today =
+      getTodayData();
 
     safeText(
       "#calorieTarget",
@@ -391,9 +465,11 @@ document.addEventListener("DOMContentLoaded", () => {
       today.water
     );
 
-    const bmi = calculateBMI();
+    const bmi =
+      calculateBMI();
 
     if (bmi > 0) {
+
       safeText(
         "#bmiValue",
         bmi.toFixed(1)
@@ -403,6 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "#bmiStatus",
         bmiStatus(bmi)
       );
+
     }
 
     const caloriePercent =
@@ -438,6 +515,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveLocalData();
   }
 
+
   // =========================================================
   // PROFILE
   // =========================================================
@@ -446,13 +524,17 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#profileForm");
 
   if (profileForm) {
+
     profileForm.addEventListener(
       "submit",
       async (event) => {
+
         event.preventDefault();
 
         const name =
-          $("#fullName")?.value.trim();
+          $("#fullName")
+            ?.value
+            .trim();
 
         const birthDate =
           $("#birthDate")?.value;
@@ -473,13 +555,19 @@ document.addEventListener("DOMContentLoaded", () => {
           $("#activity")?.value;
 
         const likedFoods =
-          $("#likedFoods")?.value.trim();
+          $("#likedFoods")
+            ?.value
+            .trim();
 
         const dislikedFoods =
-          $("#dislikedFoods")?.value.trim();
+          $("#dislikedFoods")
+            ?.value
+            .trim();
 
         const allergies =
-          $("#allergies")?.value.trim();
+          $("#allergies")
+            ?.value
+            .trim();
 
         const mealsPerDay =
           Number(
@@ -495,6 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
           !goal ||
           !activity
         ) {
+
           showMessage(
             "اكمل كل البيانات المطلوبة",
             "error"
@@ -503,25 +592,45 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        userData.name = name;
-        userData.birthDate = birthDate;
-        userData.gender = gender;
-        userData.height = height;
-        userData.weight = weight;
-        userData.goal = goal;
-        userData.activity = activity;
-        userData.likedFoods = likedFoods;
-        userData.dislikedFoods = dislikedFoods;
-        userData.allergies = allergies;
-        userData.mealsPerDay = mealsPerDay;
+        userData.name =
+          name;
 
-        userData.profileCompleted = true;
+        userData.birthDate =
+          birthDate;
+
+        userData.gender =
+          gender;
+
+        userData.height =
+          height;
+
+        userData.weight =
+          weight;
+
+        userData.goal =
+          goal;
+
+        userData.activity =
+          activity;
+
+        userData.likedFoods =
+          likedFoods;
+
+        userData.dislikedFoods =
+          dislikedFoods;
+
+        userData.allergies =
+          allergies;
+
+        userData.mealsPerDay =
+          mealsPerDay;
+
+        userData.profileCompleted =
+          true;
 
         saveLocalData();
 
         await saveProfileToSupabase();
-
-        updateDashboard();
 
         showDashboard();
 
@@ -529,42 +638,77 @@ document.addEventListener("DOMContentLoaded", () => {
           "تم حفظ بياناتك وبناء خطتك بنجاح",
           "success"
         );
+
       }
     );
+
   }
 
+
   // =========================================================
-  // SUPABASE PROFILE
+  // SAVE PROFILE
   // =========================================================
 
   async function saveProfileToSupabase() {
-    if (!supabaseClient) return;
+
+    if (!supabaseClient) {
+      return;
+    }
 
     try {
+
       const {
-        data,
-        error
+        data
       } =
         await supabaseClient.auth.getUser();
 
-      const user = data?.user;
+      const user =
+        data?.user;
 
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       const profile = {
+
         id: user.id,
-        email: user.email,
-        full_name: userData.name,
-        birth_date: userData.birthDate,
-        gender: userData.gender,
-        height: userData.height,
-        weight: userData.weight,
-        goal: userData.goal,
-        activity: userData.activity,
-        liked_foods: userData.likedFoods,
-        disliked_foods: userData.dislikedFoods,
-        allergies: userData.allergies,
-        meals_per_day: userData.mealsPerDay
+
+        email:
+          user.email,
+
+        full_name:
+          userData.name,
+
+        birth_date:
+          userData.birthDate,
+
+        gender:
+          userData.gender,
+
+        height:
+          userData.height,
+
+        weight:
+          userData.weight,
+
+        goal:
+          userData.goal,
+
+        activity:
+          userData.activity,
+
+        liked_foods:
+          userData.likedFoods,
+
+        disliked_foods:
+          userData.dislikedFoods,
+
+        allergies:
+          userData.allergies,
+
+        meals_per_day:
+          userData.mealsPerDay
+
       };
 
       const result =
@@ -578,34 +722,52 @@ document.addEventListener("DOMContentLoaded", () => {
           result.error
         );
       }
+
     } catch (error) {
-      console.warn(error);
+
+      console.warn(
+        "Profile save error:",
+        error
+      );
+
     }
   }
+
 
   // =========================================================
   // SHOW DASHBOARD
   // =========================================================
 
   function showDashboard() {
-    showScreen("dashboardScreen");
+
+    showScreen(
+      "dashboardScreen"
+    );
 
     safeText(
       "#welcomeName",
-      userData.name || "اهلا بيك"
+      userData.name ||
+      "اهلا بيك"
     );
 
     updateDashboard();
+
     updateDate();
   }
 
+
   function showProfile() {
-    showScreen("profileScreen");
+
+    showScreen(
+      "profileScreen"
+    );
 
     loadProfileInputs();
   }
 
+
   function loadProfileInputs() {
+
     if (userData.name) {
       $("#fullName").value =
         userData.name;
@@ -662,11 +824,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
   // =========================================================
   // FOOD DATABASE
   // =========================================================
 
   const foods = {
+
     chicken: {
       name: "صدر فراخ مشوي",
       calories: 165,
@@ -744,9 +908,12 @@ document.addEventListener("DOMContentLoaded", () => {
       calories: 350,
       protein: 25
     }
+
   };
 
+
   function detectFood(text) {
+
     const value =
       String(text)
         .toLowerCase()
@@ -852,150 +1019,158 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
-  function calculateFood(food, grams) {
-    if (!food || grams <= 0) {
-      return null;
-    }
-
-    return {
-      calories: Math.round(
-        food.calories * grams / 100
-      ),
-
-      protein: Math.round(
-        food.protein * grams / 100
-      )
-    };
-  }
 
   // =========================================================
   // FOOD FORM
   // =========================================================
 
-  const foodForm =
-    $("#foodForm");
+  $("#foodForm")?.addEventListener(
+    "submit",
+    (event) => {
 
-  if (foodForm) {
-    foodForm.addEventListener(
-      "submit",
-      (event) => {
-        event.preventDefault();
+      event.preventDefault();
 
-        const foodName =
-          $("#foodName")
-            ?.value
-            ?.trim();
+      const foodName =
+        $("#foodName")
+          ?.value
+          ?.trim();
 
-        const caloriesInput =
-          $("#foodCalories");
+      const food =
+        detectFood(foodName);
 
-        const proteinInput =
-          $("#foodProtein");
+      let calories =
+        getNumber("#foodCalories");
 
-        const food =
-          detectFood(foodName);
+      let protein =
+        getNumber("#foodProtein");
 
-        const caloriesManual =
-          getNumber("#foodCalories");
+      if (food) {
 
-        const proteinManual =
-          getNumber("#foodProtein");
-
-        let calories =
-          caloriesManual;
-
-        let protein =
-          proteinManual;
-
-        if (food) {
-          const gramMatch =
-            foodName.match(
-              /(\d+(?:\.\d+)?)\s*(?:جرام|غرام|g|جم)?/i
-            );
-
-          if (gramMatch) {
-            const grams =
-              Number(gramMatch[1]);
-
-            const calculated =
-              calculateFood(
-                food,
-                grams
-              );
-
-            if (calculated) {
-              calories =
-                caloriesManual > 0
-                  ? caloriesManual
-                  : calculated.calories;
-
-              protein =
-                proteinManual > 0
-                  ? proteinManual
-                  : calculated.protein;
-            }
-          }
-        }
-
-        if (
-          calories <= 0 ||
-          protein < 0
-        ) {
-          showMessage(
-            "اكتب السعرات والبروتين بشكل صحيح",
-            "error"
+        const gramMatch =
+          foodName.match(
+            /(\d+(?:\.\d+)?)\s*(?:جرام|غرام|g|جم)?/i
           );
 
-          return;
+        if (gramMatch) {
+
+          const grams =
+            Number(
+              gramMatch[1]
+            );
+
+          if (calories <= 0) {
+
+            calories =
+              Math.round(
+                food.calories *
+                grams /
+                100
+              );
+
+          }
+
+          if (protein <= 0) {
+
+            protein =
+              Math.round(
+                food.protein *
+                grams /
+                100
+              );
+
+          }
         }
+      }
 
-        const today =
-          getTodayData();
-
-        today.calories += calories;
-        today.protein += protein;
-
-        today.meals.push({
-          name: foodName,
-          type:
-            $("#mealType")?.value ||
-            "meal",
-          calories,
-          protein,
-          time:
-            new Date().toISOString()
-        });
-
-        saveLocalData();
-
-        updateDashboard();
-
-        closeModal("foodModal");
-
-        foodForm.reset();
+      if (
+        calories <= 0 ||
+        protein < 0
+      ) {
 
         showMessage(
-          "تم تسجيل الوجبة بنجاح",
-          "success"
+          "اكتب السعرات والبروتين بشكل صحيح",
+          "error"
         );
+
+        return;
       }
-    );
-  }
+
+      const today =
+        getTodayData();
+
+      today.calories +=
+        calories;
+
+      today.protein +=
+        protein;
+
+      today.meals.push({
+
+        name:
+          foodName,
+
+        type:
+          $("#mealType")?.value ||
+          "meal",
+
+        calories,
+
+        protein,
+
+        time:
+          new Date().toISOString()
+
+      });
+
+      saveLocalData();
+
+      updateDashboard();
+
+      closeModal(
+        "foodModal"
+      );
+
+      $("#foodForm").reset();
+
+      showMessage(
+        "تم تسجيل الوجبة بنجاح",
+        "success"
+      );
+
+    }
+  );
+
 
   // =========================================================
   // FOOD LIST
   // =========================================================
 
+  function escapeHTML(text) {
+
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+
   function renderFoodList() {
+
     const list =
       $("#foodList");
 
-    if (!list) return;
+    if (!list) {
+      return;
+    }
 
     const today =
       getTodayData();
 
     if (!today.meals?.length) {
+
       list.innerHTML = `
         <div class="empty-state">
           مفيش وجبات مسجلة لسه
@@ -1007,41 +1182,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
     list.innerHTML =
       today.meals
-        .map((meal) => `
+        .map(
+          (meal) => `
+
           <div class="food-item">
+
             <div>
+
               <strong>
                 ${escapeHTML(meal.name)}
               </strong>
 
               <small>
                 ${meal.calories} kcal
-                • ${meal.protein}g protein
+                •
+                ${meal.protein}g protein
               </small>
+
             </div>
+
           </div>
-        `)
+        `
+        )
         .join("");
+
   }
 
-  function escapeHTML(text) {
-    return String(text)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
 
   // =========================================================
   // WATER
   // =========================================================
 
   function addWater(amount = 250) {
+
     const today =
       getTodayData();
 
-    today.water += amount;
+    today.water +=
+      amount;
 
     saveLocalData();
 
@@ -1053,12 +1231,14 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+
   $("#waterBtn")?.addEventListener(
     "click",
     () => {
       addWater(250);
     }
   );
+
 
   $("#addWaterBtn")?.addEventListener(
     "click",
@@ -1067,6 +1247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
+
   // =========================================================
   // SLEEP
   // =========================================================
@@ -1074,6 +1255,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#sleepForm")?.addEventListener(
     "submit",
     (event) => {
+
       event.preventDefault();
 
       const start =
@@ -1090,6 +1272,7 @@ document.addEventListener("DOMContentLoaded", () => {
         Number.isNaN(start.getTime()) ||
         Number.isNaN(end.getTime())
       ) {
+
         showMessage(
           "اختار وقت النوم والاستيقاظ",
           "error"
@@ -1099,22 +1282,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (end <= start) {
+
         end.setDate(
           end.getDate() + 1
         );
+
       }
 
       const hours =
-        (end - start) /
-        (1000 * 60 * 60);
+        (
+          end - start
+        ) /
+        (
+          1000 *
+          60 *
+          60
+        );
 
       const today =
         getTodayData();
 
       today.sleep = {
-        start: start.toISOString(),
-        end: end.toISOString(),
+
+        start:
+          start.toISOString(),
+
+        end:
+          end.toISOString(),
+
         hours
+
       };
 
       saveLocalData();
@@ -1123,21 +1320,26 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#sleepResult");
 
       if (result) {
+
         result.innerHTML = `
           <div class="sleep-result">
-            نومك: <strong>
+            نومك:
+            <strong>
               ${hours.toFixed(1)} ساعة
             </strong>
           </div>
         `;
+
       }
 
       showMessage(
         "تم تسجيل النوم بنجاح",
         "success"
       );
+
     }
   );
+
 
   // =========================================================
   // EXERCISE
@@ -1146,6 +1348,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#exerciseForm")?.addEventListener(
     "submit",
     (event) => {
+
       event.preventDefault();
 
       const name =
@@ -1167,6 +1370,7 @@ document.addEventListener("DOMContentLoaded", () => {
         !name ||
         duration <= 0
       ) {
+
         showMessage(
           "اكتب بيانات التمرين بشكل صحيح",
           "error"
@@ -1179,16 +1383,23 @@ document.addEventListener("DOMContentLoaded", () => {
         getTodayData();
 
       today.exercises.push({
+
         name,
+
         duration,
+
         calories,
+
         time:
           new Date().toISOString()
+
       });
 
       saveLocalData();
 
-      closeModal("exerciseModal");
+      closeModal(
+        "exerciseModal"
+      );
 
       $("#exerciseForm").reset();
 
@@ -1196,85 +1407,117 @@ document.addEventListener("DOMContentLoaded", () => {
         "تم تسجيل التمرين بنجاح",
         "success"
       );
+
     }
   );
+
 
   // =========================================================
   // MODALS
   // =========================================================
 
   function openModal(id) {
-    const modal = $(`#${id}`);
+
+    const modal =
+      $(`#${id}`);
 
     if (modal) {
-      modal.classList.remove("hidden");
+      modal.classList.remove(
+        "hidden"
+      );
     }
   }
+
 
   function closeModal(id) {
-    const modal = $(`#${id}`);
+
+    const modal =
+      $(`#${id}`);
 
     if (modal) {
-      modal.classList.add("hidden");
+      modal.classList.add(
+        "hidden"
+      );
     }
   }
+
 
   $("#logFoodBtn")?.addEventListener(
     "click",
     () => openModal("foodModal")
   );
 
+
   $("#sleepBtn")?.addEventListener(
     "click",
     () => openModal("sleepModal")
   );
+
 
   $("#exerciseBtn")?.addEventListener(
     "click",
     () => openModal("exerciseModal")
   );
 
+
   $("#proBtn")?.addEventListener(
     "click",
     () => openModal("proModal")
   );
 
+
   $$(".close-modal").forEach(
     (button) => {
+
       button.addEventListener(
         "click",
         () => {
+
           const id =
             button.dataset.close;
 
           if (id) {
             closeModal(id);
           }
+
         }
       );
+
     }
   );
 
+
   $$(".modal").forEach(
     (modal) => {
+
       modal.addEventListener(
         "click",
         (event) => {
+
           if (
             event.target === modal
           ) {
+
             modal.classList.add(
               "hidden"
             );
+
           }
+
         }
       );
+
     }
   );
+
 
   // =========================================================
   // PRO PAYMENT
   // =========================================================
+
+  const PAYMENT_URL =
+    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
+
 
   const requestProBtn =
     $("#requestProBtn");
@@ -1294,22 +1537,62 @@ document.addEventListener("DOMContentLoaded", () => {
   const proMessage =
     $("#proMessage");
 
-  const PAYMENT_URL =
-    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
 
   if (requestProBtn) {
+
     requestProBtn.addEventListener(
       "click",
-      () => {
+      async () => {
+
+        /*
+          مهم:
+          بمجرد الضغط على طلب PRO
+          نحاول التأكد من وجود Session.
+        */
+
+        if (!supabaseClient) {
+
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
+
+          return;
+        }
+
+        const {
+          data: sessionData
+        } =
+          await supabaseClient.auth.getSession();
+
+        if (!sessionData?.session) {
+
+          showMessage(
+            "سجل دخولك أولا قبل طلب PRO",
+            "error"
+          );
+
+          showScreen(
+            "authScreen"
+          );
+
+          return;
+        }
+
+
         if (proPaymentArea) {
+
           proPaymentArea.classList.remove(
             "hidden"
           );
+
         }
 
+
         if (proMessage) {
+
           proMessage.textContent =
-            `أهلا ${userData.name || "مستخدم"} 👋
+`أهلا ${userData.name || "مستخدم"} 👋
 
 لتفعيل dr.elorabi PRO:
 
@@ -1322,79 +1605,118 @@ document.addEventListener("DOMContentLoaded", () => {
 5️⃣ اضغط تأكيد الدفع.
 
 سيتم مراجعة التحويل من الإدارة.`;
+
         }
 
+
         if (paymentLink) {
+
           paymentLink.href =
             PAYMENT_URL;
 
-          paymentLink.style.display =
-            "block";
+          paymentLink.classList.remove(
+            "hidden"
+          );
+
         }
 
+
         showMessage(
-          "ادفع 50 جنيه ثم ارفع صورة التحويل"
+          "ادفع 50 جنيه ثم ارفع صورة التحويل",
+          "success"
         );
+
       }
     );
+
   }
 
+
+  // =========================================================
+  // SCREENSHOT
+  // =========================================================
+
   if (paymentScreenshot) {
+
     paymentScreenshot.addEventListener(
       "change",
       () => {
+
         const file =
           paymentScreenshot.files?.[0];
 
-        if (!file) return;
+        if (!file) {
+          return;
+        }
 
         if (
           !file.type.startsWith(
             "image/"
           )
         ) {
+
           showMessage(
             "ارفع صورة فقط",
             "error"
           );
 
-          paymentScreenshot.value = "";
+          paymentScreenshot.value =
+            "";
 
           return;
         }
+
 
         if (
           file.size >
           5 * 1024 * 1024
         ) {
+
           showMessage(
             "حجم الصورة أكبر من 5MB",
             "error"
           );
 
-          paymentScreenshot.value = "";
+          paymentScreenshot.value =
+            "";
 
           return;
         }
 
+
         if (confirmPaymentBtn) {
-          confirmPaymentBtn.style.display =
-            "block";
+
+          confirmPaymentBtn.classList.remove(
+            "hidden"
+          );
+
         }
 
         showMessage(
-          "تم اختيار صورة التحويل"
+          "تم اختيار صورة التحويل",
+          "success"
         );
+
       }
     );
+
   }
 
+
+  // =========================================================
+  // CONFIRM PAYMENT
+  // =========================================================
+
   if (confirmPaymentBtn) {
+
     confirmPaymentBtn.addEventListener(
       "click",
       async () => {
+
         try {
+
           if (!supabaseClient) {
+
             showMessage(
               "Supabase غير متصل",
               "error"
@@ -1403,17 +1725,26 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
+
+          /*
+            الحل الأساسي للمشكلة:
+
+            نستخدم getSession()
+            بدل الاعتماد فقط على getUser().
+          */
+
           const {
-            data,
-            error
+            data: sessionData,
+            error: sessionError
           } =
-            await supabaseClient.auth
-              .getUser();
+            await supabaseClient.auth.getSession();
+
 
           if (
-            error ||
-            !data?.user
+            sessionError ||
+            !sessionData?.session
           ) {
+
             showMessage(
               "سجل دخولك أولا",
               "error"
@@ -1422,10 +1753,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
+
+          const user =
+            sessionData.session.user;
+
+
           const file =
             paymentScreenshot?.files?.[0];
 
+
           if (!file) {
+
             showMessage(
               "ارفع صورة التحويل أولا",
               "error"
@@ -1434,14 +1772,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
+
           confirmPaymentBtn.disabled =
             true;
 
           confirmPaymentBtn.textContent =
             "جاري إرسال الطلب...";
 
-          const user =
-            data.user;
 
           const extension =
             file.name
@@ -1450,8 +1787,14 @@ document.addEventListener("DOMContentLoaded", () => {
               ?.toLowerCase() ||
             "jpg";
 
+
           const filePath =
             `${user.id}/${Date.now()}.${extension}`;
+
+
+          /*
+            Upload screenshot
+          */
 
           const {
             error: uploadError
@@ -1469,15 +1812,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
               );
 
+
           if (uploadError) {
+
             console.error(
               uploadError
             );
 
             throw new Error(
-              "فشل رفع صورة التحويل"
+              "فشل رفع صورة التحويل: " +
+              uploadError.message
             );
+
           }
+
+
+          /*
+            Public URL
+          */
 
           const {
             data: publicData
@@ -1490,9 +1842,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 filePath
               );
 
+
           const screenshotUrl =
             publicData?.publicUrl ||
             filePath;
+
+
+          /*
+            Insert payment request
+          */
 
           const {
             error: dbError
@@ -1502,26 +1860,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 "payment_requests"
               )
               .insert({
-                user_id: user.id,
-                amount: 50,
+
+                user_id:
+                  user.id,
+
+                amount:
+                  50,
+
                 payment_method:
                   "InstaPay",
+
                 transaction_reference:
                   null,
+
                 screenshot_url:
                   screenshotUrl,
-                status: "pending"
+
+                status:
+                  "pending"
+
               });
 
+
           if (dbError) {
+
             console.error(
               dbError
             );
 
             throw new Error(
-              "فشل تسجيل طلب الدفع"
+              "فشل تسجيل طلب الدفع: " +
+              dbError.message
             );
+
           }
+
+
+          /*
+            Local status
+          */
 
           userData.paymentStatus =
             "pending";
@@ -1531,25 +1908,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
           saveLocalData();
 
+
           if (proMessage) {
+
             proMessage.textContent =
-              `✅ تم إرسال طلب الدفع بنجاح.
+`✅ تم إرسال طلب الدفع بنجاح.
 
 سيتم مراجعة التحويل من الإدارة.
 
 بعد الموافقة سيتم تفعيل PRO.`;
+
           }
+
 
           confirmPaymentBtn.textContent =
             "تم إرسال الطلب ✓";
+
 
           showMessage(
             "تم إرسال طلب PRO للإدارة",
             "success"
           );
 
+
         } catch (error) {
-          console.error(error);
+
+          console.error(
+            "Payment error:",
+            error
+          );
+
 
           confirmPaymentBtn.disabled =
             false;
@@ -1557,90 +1945,124 @@ document.addEventListener("DOMContentLoaded", () => {
           confirmPaymentBtn.textContent =
             "تأكيد الدفع";
 
+
           showMessage(
             error.message ||
             "حدث خطأ غير متوقع",
             "error"
           );
+
         }
+
       }
     );
+
   }
+
 
   // =========================================================
   // SIGN UP
   // =========================================================
 
-  const signupForm =
-    $("#signupForm");
+  $("#signupForm")?.addEventListener(
+    "submit",
+    async (event) => {
 
-  if (signupForm) {
-    signupForm.addEventListener(
-      "submit",
-      async (event) => {
-        event.preventDefault();
+      event.preventDefault();
 
-        if (!supabaseClient) {
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
-
-          return;
-        }
-
-        const email =
-          $("#signupEmail")
-            ?.value
-            ?.trim();
-
-        const password =
-          $("#signupPassword")
-            ?.value;
-
-        if (
-          !email ||
-          !password
-        ) {
-          showMessage(
-            "اكتب البريد وكلمة المرور",
-            "error"
-          );
-
-          return;
-        }
-
-        if (password.length < 6) {
-          showMessage(
-            "كلمة المرور لازم تكون 6 حروف أو أكثر",
-            "error"
-          );
-
-          return;
-        }
-
-        const {
-          error
-        } =
-          await supabaseClient.auth
-            .signUp({
-              email,
-              password
-            });
-
-        if (error) {
-          console.error(error);
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-          return;
-        }
+      if (!supabaseClient) {
 
         showMessage(
-          "تم إنشاء الحساب بنجاح. لو طلب منك تأكيد البريد، راجع الإيميل.",
+          "Supabase غير متصل",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const email =
+        $("#signupEmail")
+          ?.value
+          ?.trim();
+
+      const password =
+        $("#signupPassword")
+          ?.value;
+
+
+      if (
+        !email ||
+        !password
+      ) {
+
+        showMessage(
+          "اكتب البريد وكلمة المرور",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (
+        password.length < 6
+      ) {
+
+        showMessage(
+          "كلمة المرور لازم تكون 6 حروف أو أكثر",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .signUp({
+            email,
+            password
+          });
+
+
+      if (error) {
+
+        console.error(
+          error
+        );
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      /*
+        لو Supabase محتاج تأكيد Email
+      */
+
+      if (
+        data?.session
+      ) {
+
+        showMessage(
+          "تم إنشاء الحساب وتسجيل الدخول",
+          "success"
+        );
+
+        await loadCurrentUser();
+
+      } else {
+
+        showMessage(
+          "تم إنشاء الحساب. راجع الإيميل لتأكيد الحساب ثم سجل الدخول.",
           "success"
         );
 
@@ -1653,82 +2075,109 @@ document.addEventListener("DOMContentLoaded", () => {
           ?.classList.remove(
             "hidden"
           );
+
       }
-    );
-  }
+
+    }
+  );
+
 
   // =========================================================
   // LOGIN
   // =========================================================
 
-  const loginForm =
-    $("#loginForm");
+  $("#loginForm")?.addEventListener(
+    "submit",
+    async (event) => {
 
-  if (loginForm) {
-    loginForm.addEventListener(
-      "submit",
-      async (event) => {
-        event.preventDefault();
+      event.preventDefault();
 
-        if (!supabaseClient) {
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
-
-          return;
-        }
-
-        const email =
-          $("#loginEmail")
-            ?.value
-            ?.trim();
-
-        const password =
-          $("#loginPassword")
-            ?.value;
-
-        if (
-          !email ||
-          !password
-        ) {
-          showMessage(
-            "اكتب البريد وكلمة المرور",
-            "error"
-          );
-
-          return;
-        }
-
-        const {
-          error
-        } =
-          await supabaseClient.auth
-            .signInWithPassword({
-              email,
-              password
-            });
-
-        if (error) {
-          console.error(error);
-
-          showMessage(
-            error.message,
-            "error"
-          );
-
-          return;
-        }
+      if (!supabaseClient) {
 
         showMessage(
-          "تم تسجيل الدخول بنجاح",
-          "success"
+          "Supabase غير متصل",
+          "error"
         );
 
-        await loadCurrentUser();
+        return;
       }
-    );
-  }
+
+
+      const email =
+        $("#loginEmail")
+          ?.value
+          ?.trim();
+
+      const password =
+        $("#loginPassword")
+          ?.value;
+
+
+      if (
+        !email ||
+        !password
+      ) {
+
+        showMessage(
+          "اكتب البريد وكلمة المرور",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth
+          .signInWithPassword({
+
+            email,
+
+            password
+
+          });
+
+
+      if (error) {
+
+        console.error(
+          error
+        );
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (!data?.session) {
+
+        showMessage(
+          "لم يتم إنشاء جلسة دخول",
+          "error"
+        );
+
+        return;
+      }
+
+
+      showMessage(
+        "تم تسجيل الدخول بنجاح",
+        "success"
+      );
+
+
+      await loadCurrentUser();
+
+    }
+  );
+
 
   // =========================================================
   // LOGOUT
@@ -1737,8 +2186,11 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#logoutBtn")?.addEventListener(
     "click",
     async () => {
+
       if (supabaseClient) {
+
         await supabaseClient.auth.signOut();
+
       }
 
       userData = {};
@@ -1747,78 +2199,133 @@ document.addEventListener("DOMContentLoaded", () => {
         STORAGE_KEY
       );
 
-      showScreen("authScreen");
+      showScreen(
+        "authScreen"
+      );
 
       showMessage(
         "تم تسجيل الخروج",
         "success"
       );
+
     }
   );
+
 
   // =========================================================
   // LOAD CURRENT USER
   // =========================================================
 
   async function loadCurrentUser() {
+
     if (!supabaseClient) {
-      if (userData.profileCompleted) {
+
+      if (
+        userData.profileCompleted
+      ) {
+
         showDashboard();
+
       } else {
-        showScreen("authScreen");
+
+        showScreen(
+          "authScreen"
+        );
+
       }
 
       return;
     }
 
+
     try {
+
+      /*
+        نستخدم getSession
+        عشان نضمن وجود session.
+      */
+
       const {
-        data
+        data: sessionData
       } =
         await supabaseClient.auth
-          .getUser();
+          .getSession();
 
-      const user =
-        data?.user;
 
-      if (!user) {
-        showScreen("authScreen");
+      const session =
+        sessionData?.session;
+
+
+      if (!session) {
+
+        showScreen(
+          "authScreen"
+        );
+
         return;
       }
+
+
+      const user =
+        session.user;
+
 
       await loadProfileFromSupabase(
         user
       );
 
+
       if (
         userData.profileCompleted
       ) {
+
         showDashboard();
+
       } else {
+
         showProfile();
+
       }
+
 
     } catch (error) {
-      console.error(error);
+
+      console.error(
+        error
+      );
+
 
       if (
         userData.profileCompleted
       ) {
+
         showDashboard();
+
       } else {
-        showScreen("authScreen");
+
+        showScreen(
+          "authScreen"
+        );
+
       }
+
     }
+
   }
 
+
   // =========================================================
-  // LOAD PROFILE FROM SUPABASE
+  // LOAD PROFILE
   // =========================================================
 
   async function loadProfileFromSupabase(user) {
-    if (!supabaseClient) return;
+
+    if (!supabaseClient) {
+      return;
+    }
 
     try {
+
       const {
         data,
         error
@@ -1829,7 +2336,9 @@ document.addEventListener("DOMContentLoaded", () => {
           .eq("id", user.id)
           .maybeSingle();
 
+
       if (error) {
+
         console.warn(
           "Profile load:",
           error
@@ -1838,81 +2347,110 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (!data) return;
+
+      if (!data) {
+        return;
+      }
+
 
       userData.name =
         data.full_name ||
         userData.name ||
         "";
 
+
       userData.birthDate =
         data.birth_date ||
         userData.birthDate ||
         "";
+
 
       userData.gender =
         data.gender ||
         userData.gender ||
         "";
 
+
       userData.height =
         data.height ||
         userData.height ||
         "";
+
 
       userData.weight =
         data.weight ||
         userData.weight ||
         "";
 
+
       userData.goal =
         data.goal ||
         userData.goal ||
         "";
+
 
       userData.activity =
         data.activity ||
         userData.activity ||
         "";
 
+
       userData.likedFoods =
         data.liked_foods ||
         "";
+
 
       userData.dislikedFoods =
         data.disliked_foods ||
         "";
 
+
       userData.allergies =
         data.allergies ||
         "";
+
 
       userData.mealsPerDay =
         data.meals_per_day ||
         4;
 
+
       userData.profileCompleted =
         Boolean(
+
           data.full_name &&
           data.birth_date &&
           data.height &&
           data.weight &&
-          data.goal
+          data.goal &&
+          data.activity
+
         );
+
 
       saveLocalData();
 
+
     } catch (error) {
-      console.warn(error);
+
+      console.warn(
+        "Profile error:",
+        error
+      );
+
     }
+
   }
+
 
   // =========================================================
   // DATE
   // =========================================================
 
   function updateDate() {
-    const now = new Date();
+
+    const now =
+      new Date();
 
     const text =
       now.toLocaleDateString(
@@ -1929,43 +2467,12 @@ document.addEventListener("DOMContentLoaded", () => {
       "#todayText",
       text
     );
+
   }
 
-  // =========================================================
-  // LIVE CLOCK
-  // =========================================================
-
-  function updateClock() {
-    const now = new Date();
-
-    safeText(
-      "#liveClock",
-      now.toLocaleTimeString(
-        "ar-EG"
-      )
-    );
-
-    safeText(
-      "#todayDate",
-      now.toLocaleDateString(
-        "ar-EG",
-        {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric"
-        }
-      )
-    );
-  }
-
-  setInterval(
-    updateClock,
-    1000
-  );
 
   // =========================================================
-  // LIVE PROFILE CALCULATION
+  // PROFILE LIVE CALCULATION
   // =========================================================
 
   [
@@ -1977,9 +2484,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "#activity"
   ].forEach(
     (selector) => {
-      const element = $(selector);
 
-      if (!element) return;
+      const element =
+        $(selector);
+
+      if (!element) {
+        return;
+      }
 
       element.addEventListener(
         "input",
@@ -1994,8 +2505,50 @@ document.addEventListener("DOMContentLoaded", () => {
           updateDashboard();
         }
       );
+
     }
   );
+
+
+  // =========================================================
+  // AUTH SCREEN SWITCH
+  // =========================================================
+
+  $("#showSignup")?.addEventListener(
+    "click",
+    () => {
+
+      $("#loginBox")
+        ?.classList.add(
+          "hidden"
+        );
+
+      $("#signupBox")
+        ?.classList.remove(
+          "hidden"
+        );
+
+    }
+  );
+
+
+  $("#showLogin")?.addEventListener(
+    "click",
+    () => {
+
+      $("#signupBox")
+        ?.classList.add(
+          "hidden"
+        );
+
+      $("#loginBox")
+        ?.classList.remove(
+          "hidden"
+        );
+
+    }
+  );
+
 
   // =========================================================
   // INITIAL
@@ -2004,12 +2557,13 @@ document.addEventListener("DOMContentLoaded", () => {
   loadProfileInputs();
 
   updateDate();
-  updateClock();
+
   updateDashboard();
 
-  loadCurrentUser();
+  await loadCurrentUser();
 
   console.log(
     "dr.elorabi application loaded successfully."
   );
+
 });
