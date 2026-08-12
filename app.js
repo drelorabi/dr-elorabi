@@ -1,13 +1,7 @@
-/* =========================================================
-   dr.elorabi
-   Personal Health, Fitness & Nutrition App
-   ========================================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
-
-  // =========================
+  // =========================================================
   // SUPABASE
-  // =========================
+  // =========================================================
 
   const SUPABASE_URL =
     "https://cwnjzwmficiuoybimqsc.supabase.co";
@@ -17,62 +11,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let supabaseClient = null;
 
-  if (window.supabase && SUPABASE_URL && SUPABASE_KEY) {
+  if (window.supabase) {
     try {
       supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
       );
     } catch (error) {
-      console.error("Supabase initialization error:", error);
+      console.error("Supabase error:", error);
     }
   }
 
-  // =========================
+  // =========================================================
   // HELPERS
-  // =========================
+  // =========================================================
 
-  const $ = (selector) =>
-    document.querySelector(selector);
+  const $ = (selector) => document.querySelector(selector);
 
   const $$ = (selector) =>
     Array.from(document.querySelectorAll(selector));
 
-  function showMessage(message, type = "info") {
-
-    let box = $("#appMessage");
-
-    if (!box) {
-      box = document.createElement("div");
-
-      box.id = "appMessage";
-
-      box.style.position = "fixed";
-      box.style.left = "20px";
-      box.style.right = "20px";
-      box.style.bottom = "20px";
-      box.style.zIndex = "99999";
-      box.style.padding = "15px";
-      box.style.borderRadius = "14px";
-      box.style.background = "#111827";
-      box.style.color = "white";
-      box.style.textAlign = "center";
-      box.style.fontWeight = "600";
-
-      document.body.appendChild(box);
-    }
-
-    box.textContent = message;
-
-    clearTimeout(box._timer);
-
-    box._timer = setTimeout(() => {
-      box.remove();
-    }, 4000);
-  }
-
   function safeText(selector, value) {
-
     const element = $(selector);
 
     if (element) {
@@ -81,53 +40,127 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getNumber(selector, fallback = 0) {
-
     const element = $(selector);
 
     if (!element) return fallback;
 
-    const number = Number(element.value);
+    const value = Number(element.value);
 
-    return Number.isFinite(number)
-      ? number
-      : fallback;
+    return Number.isFinite(value) ? value : fallback;
   }
 
-  // =========================
-  // LOCAL USER DATA
-  // =========================
+  function showMessage(message, type = "info") {
+    let box = $("#appMessage");
+
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "appMessage";
+
+      Object.assign(box.style, {
+        position: "fixed",
+        bottom: "20px",
+        left: "20px",
+        right: "20px",
+        zIndex: "99999",
+        padding: "15px",
+        borderRadius: "14px",
+        background: "#111827",
+        color: "#fff",
+        textAlign: "center",
+        fontWeight: "700",
+        boxShadow: "0 10px 30px rgba(0,0,0,.25)"
+      });
+
+      document.body.appendChild(box);
+    }
+
+    box.textContent = message;
+
+    box.style.background =
+      type === "error"
+        ? "#b91c1c"
+        : type === "success"
+        ? "#15803d"
+        : "#111827";
+
+    clearTimeout(box._timer);
+
+    box._timer = setTimeout(() => {
+      box.remove();
+    }, 4000);
+  }
+
+  function showScreen(id) {
+    $$(".screen").forEach((screen) => {
+      screen.classList.add("hidden");
+    });
+
+    const screen = $(`#${id}`);
+
+    if (screen) {
+      screen.classList.remove("hidden");
+    }
+  }
+
+  function todayKey() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  // =========================================================
+  // LOCAL DATA
+  // =========================================================
 
   const STORAGE_KEY = "dr_elorabi_user";
 
   let userData = {};
 
   try {
-
     userData = JSON.parse(
       localStorage.getItem(STORAGE_KEY) || "{}"
     );
-
   } catch {
-
     userData = {};
-
   }
 
   function saveLocalData() {
-
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(userData)
     );
-
   }
 
-  // =========================
-  // AGE CALCULATOR
-  // =========================
+  // =========================================================
+  // AUTH SCREEN SWITCH
+  // =========================================================
+
+  const showSignup = $("#showSignup");
+  const showLogin = $("#showLogin");
+
+  if (showSignup) {
+    showSignup.addEventListener("click", () => {
+      $("#loginBox")?.classList.add("hidden");
+      $("#signupBox")?.classList.remove("hidden");
+    });
+  }
+
+  if (showLogin) {
+    showLogin.addEventListener("click", () => {
+      $("#signupBox")?.classList.add("hidden");
+      $("#loginBox")?.classList.remove("hidden");
+    });
+  }
+
+  // =========================================================
+  // AGE
+  // =========================================================
 
   function calculateAge(dateString) {
-
     if (!dateString) return 0;
 
     const birth = new Date(dateString);
@@ -142,14 +175,14 @@ document.addEventListener("DOMContentLoaded", () => {
       today.getFullYear() -
       birth.getFullYear();
 
-    const monthDifference =
+    const month =
       today.getMonth() -
       birth.getMonth();
 
     if (
-      monthDifference < 0 ||
+      month < 0 ||
       (
-        monthDifference === 0 &&
+        month === 0 &&
         today.getDate() < birth.getDate()
       )
     ) {
@@ -159,38 +192,65 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(0, age);
   }
 
-  // =========================
-  // CALORIE CALCULATOR
-  // =========================
+  // =========================================================
+  // BMI
+  // =========================================================
 
-  function calculateCalories() {
+  function calculateBMI() {
+    const weight = getNumber("#weight");
+    const height = getNumber("#height");
 
-    const weight =
-      getNumber("#weight", 0);
-
-    const height =
-      getNumber("#height", 0);
-
-    let birthDate = "";
-
-    const birthElement =
-      $("#birthDate");
-
-    if (birthElement) {
-      birthDate =
-        birthElement.value;
+    if (weight <= 0 || height <= 0) {
+      return 0;
     }
 
-    const age =
-      calculateAge(birthDate);
+    const heightMeters = height / 100;
 
-    const genderElement =
-      $("input[name='gender']:checked");
+    return weight /
+      (heightMeters * heightMeters);
+  }
 
-    const gender =
-      genderElement
-        ? genderElement.value
-        : "male";
+  function bmiStatus(bmi) {
+    if (bmi < 18.5) {
+      return "نقص وزن";
+    }
+
+    if (bmi < 25) {
+      return "طبيعي";
+    }
+
+    if (bmi < 30) {
+      return "زيادة وزن";
+    }
+
+    return "سمنة";
+  }
+
+  // =========================================================
+  // CALORIES
+  // =========================================================
+
+  function getActivityMultiplier() {
+    const activity = $("#activity")?.value;
+
+    const values = {
+      sedentary: 1.2,
+      light: 1.375,
+      moderate: 1.55,
+      high: 1.725
+    };
+
+    return values[activity] || 1.2;
+  }
+
+  function calculateCalories() {
+    const weight = getNumber("#weight");
+    const height = getNumber("#height");
+    const birthDate = $("#birthDate")?.value || "";
+    const gender = $("#gender")?.value || "male";
+    const goal = $("#goal")?.value || "maintenance";
+
+    const age = calculateAge(birthDate);
 
     if (
       weight <= 0 ||
@@ -203,205 +263,410 @@ document.addEventListener("DOMContentLoaded", () => {
     let bmr;
 
     if (gender === "female") {
-
       bmr =
         (10 * weight) +
         (6.25 * height) -
         (5 * age) -
         161;
-
     } else {
-
       bmr =
         (10 * weight) +
         (6.25 * height) -
         (5 * age) +
         5;
-
     }
-
-    const activityElement =
-      $("#activityLevel");
-
-    const activity =
-      activityElement
-        ? Number(activityElement.value)
-        : 1.375;
 
     const maintenance =
-      bmr * activity;
+      bmr * getActivityMultiplier();
 
-    const goalElement =
-      $("#goal");
+    let calories = maintenance;
 
-    const goal =
-      goalElement
-        ? goalElement.value
-        : "maintain";
-
-    let target =
-      maintenance;
-
-    if (goal === "lose") {
-      target =
-        maintenance - 400;
+    if (goal === "fat_loss") {
+      calories = maintenance - 400;
     }
 
-    if (goal === "gain") {
-      target =
-        maintenance + 250;
+    if (goal === "muscle_gain") {
+      calories = maintenance + 250;
     }
 
-    if (goal === "recomp") {
-      target =
-        maintenance - 150;
+    if (goal === "recomposition") {
+      calories = maintenance - 150;
     }
+
+    if (goal === "maintenance") {
+      calories = maintenance;
+    }
+
+    calories = Math.max(1200, calories);
 
     const protein =
       Math.round(weight * 1.8);
 
+    const water =
+      Math.round(weight * 35);
+
     return {
-
       age,
-
-      bmr:
-        Math.round(bmr),
-
-      maintenance:
-        Math.round(maintenance),
-
-      calories:
-        Math.round(target),
-
-      protein
-
+      bmr: Math.round(bmr),
+      maintenance: Math.round(maintenance),
+      calories: Math.round(calories),
+      protein,
+      water
     };
   }
 
-  // =========================
+  // =========================================================
+  // DAILY DATA
+  // =========================================================
+
+  function getTodayData() {
+    const key = todayKey();
+
+    if (!userData.daily) {
+      userData.daily = {};
+    }
+
+    if (!userData.daily[key]) {
+      userData.daily[key] = {
+        calories: 0,
+        protein: 0,
+        water: 0,
+        meals: [],
+        exercises: [],
+        sleep: null
+      };
+    }
+
+    return userData.daily[key];
+  }
+
+  // =========================================================
   // UPDATE DASHBOARD
-  // =========================
+  // =========================================================
 
   function updateDashboard() {
-
-    const result =
-      calculateCalories();
+    const result = calculateCalories();
 
     if (!result) return;
 
+    const today = getTodayData();
+
     safeText(
       "#calorieTarget",
-      `${result.calories} kcal`
+      result.calories
     );
 
     safeText(
       "#proteinTarget",
-      `${result.protein} g`
+      result.protein
     );
 
     safeText(
-      "#maintenanceCalories",
-      `${result.maintenance} kcal`
+      "#waterTarget",
+      result.water
     );
 
     safeText(
-      "#bmrCalories",
-      `${result.bmr} kcal`
+      "#caloriesConsumed",
+      today.calories
     );
 
     safeText(
-      "#ageDisplay",
-      `${result.age} سنة`
+      "#caloriesGoal",
+      result.calories
     );
 
-    userData.targets =
-      result;
+    safeText(
+      "#proteinConsumed",
+      today.protein
+    );
+
+    safeText(
+      "#proteinGoal",
+      result.protein
+    );
+
+    safeText(
+      "#waterConsumed",
+      today.water
+    );
+
+    const bmi = calculateBMI();
+
+    if (bmi > 0) {
+      safeText(
+        "#bmiValue",
+        bmi.toFixed(1)
+      );
+
+      safeText(
+        "#bmiStatus",
+        bmiStatus(bmi)
+      );
+    }
+
+    const caloriePercent =
+      Math.min(
+        100,
+        (today.calories / result.calories) * 100
+      );
+
+    const proteinPercent =
+      Math.min(
+        100,
+        (today.protein / result.protein) * 100
+      );
+
+    const calorieBar =
+      $("#calorieProgress");
+
+    const proteinBar =
+      $("#proteinProgress");
+
+    if (calorieBar) {
+      calorieBar.style.width =
+        `${caloriePercent}%`;
+    }
+
+    if (proteinBar) {
+      proteinBar.style.width =
+        `${proteinPercent}%`;
+    }
+
+    renderFoodList();
 
     saveLocalData();
   }
 
-  // =========================
-  // PROFILE FORM
-  // =========================
+  // =========================================================
+  // PROFILE
+  // =========================================================
 
   const profileForm =
     $("#profileForm");
 
   if (profileForm) {
-
     profileForm.addEventListener(
       "submit",
-      (event) => {
-
+      async (event) => {
         event.preventDefault();
 
-        userData.name =
-          $("#name")?.value?.trim() || "";
+        const name =
+          $("#fullName")?.value.trim();
 
-        userData.birthDate =
-          $("#birthDate")?.value || "";
+        const birthDate =
+          $("#birthDate")?.value;
 
-        userData.weight =
-          getNumber("#weight");
+        const gender =
+          $("#gender")?.value;
 
-        userData.height =
+        const height =
           getNumber("#height");
 
-        userData.goal =
-          $("#goal")?.value ||
-          "maintain";
+        const weight =
+          getNumber("#weight");
 
-        userData.activity =
-          $("#activityLevel")?.value ||
-          "1.375";
+        const goal =
+          $("#goal")?.value;
+
+        const activity =
+          $("#activity")?.value;
+
+        const likedFoods =
+          $("#likedFoods")?.value.trim();
+
+        const dislikedFoods =
+          $("#dislikedFoods")?.value.trim();
+
+        const allergies =
+          $("#allergies")?.value.trim();
+
+        const mealsPerDay =
+          Number(
+            $("#mealsPerDay")?.value || 4
+          );
+
+        if (
+          !name ||
+          !birthDate ||
+          !gender ||
+          !height ||
+          !weight ||
+          !goal ||
+          !activity
+        ) {
+          showMessage(
+            "اكمل كل البيانات المطلوبة",
+            "error"
+          );
+
+          return;
+        }
+
+        userData.name = name;
+        userData.birthDate = birthDate;
+        userData.gender = gender;
+        userData.height = height;
+        userData.weight = weight;
+        userData.goal = goal;
+        userData.activity = activity;
+        userData.likedFoods = likedFoods;
+        userData.dislikedFoods = dislikedFoods;
+        userData.allergies = allergies;
+        userData.mealsPerDay = mealsPerDay;
+
+        userData.profileCompleted = true;
 
         saveLocalData();
 
+        await saveProfileToSupabase();
+
         updateDashboard();
 
-        showMessage(
-          "تم حفظ بياناتك وحساب هدفك اليومي بنجاح"
-        );
+        showDashboard();
 
+        showMessage(
+          "تم حفظ بياناتك وبناء خطتك بنجاح",
+          "success"
+        );
       }
     );
   }
 
-  // =========================
-  // AUTO CALCULATION
-  // =========================
+  // =========================================================
+  // SUPABASE PROFILE
+  // =========================================================
 
-  [
-    "#weight",
-    "#height",
-    "#birthDate",
-    "#goal",
-    "#activityLevel"
-  ].forEach((selector) => {
+  async function saveProfileToSupabase() {
+    if (!supabaseClient) return;
 
-    const element =
-      $(selector);
+    try {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.getUser();
 
-    if (!element) return;
+      const user = data?.user;
 
-    element.addEventListener(
-      "input",
-      updateDashboard
+      if (!user) return;
+
+      const profile = {
+        id: user.id,
+        email: user.email,
+        full_name: userData.name,
+        birth_date: userData.birthDate,
+        gender: userData.gender,
+        height: userData.height,
+        weight: userData.weight,
+        goal: userData.goal,
+        activity: userData.activity,
+        liked_foods: userData.likedFoods,
+        disliked_foods: userData.dislikedFoods,
+        allergies: userData.allergies,
+        meals_per_day: userData.mealsPerDay
+      };
+
+      const result =
+        await supabaseClient
+          .from("profiles")
+          .upsert(profile);
+
+      if (result.error) {
+        console.warn(
+          "Profile save:",
+          result.error
+        );
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+  // =========================================================
+  // SHOW DASHBOARD
+  // =========================================================
+
+  function showDashboard() {
+    showScreen("dashboardScreen");
+
+    safeText(
+      "#welcomeName",
+      userData.name || "اهلا بيك"
     );
 
-    element.addEventListener(
-      "change",
-      updateDashboard
-    );
+    updateDashboard();
+    updateDate();
+  }
 
-  });
+  function showProfile() {
+    showScreen("profileScreen");
 
-  // =========================
+    loadProfileInputs();
+  }
+
+  function loadProfileInputs() {
+    if (userData.name) {
+      $("#fullName").value =
+        userData.name;
+    }
+
+    if (userData.birthDate) {
+      $("#birthDate").value =
+        userData.birthDate;
+    }
+
+    if (userData.gender) {
+      $("#gender").value =
+        userData.gender;
+    }
+
+    if (userData.height) {
+      $("#height").value =
+        userData.height;
+    }
+
+    if (userData.weight) {
+      $("#weight").value =
+        userData.weight;
+    }
+
+    if (userData.goal) {
+      $("#goal").value =
+        userData.goal;
+    }
+
+    if (userData.activity) {
+      $("#activity").value =
+        userData.activity;
+    }
+
+    if (userData.likedFoods) {
+      $("#likedFoods").value =
+        userData.likedFoods;
+    }
+
+    if (userData.dislikedFoods) {
+      $("#dislikedFoods").value =
+        userData.dislikedFoods;
+    }
+
+    if (userData.allergies) {
+      $("#allergies").value =
+        userData.allergies;
+    }
+
+    if (userData.mealsPerDay) {
+      $("#mealsPerDay").value =
+        userData.mealsPerDay;
+    }
+  }
+
+  // =========================================================
   // FOOD DATABASE
-  // =========================
+  // =========================================================
 
   const foods = {
-
     chicken: {
       name: "صدر فراخ مشوي",
       calories: 165,
@@ -460,46 +725,36 @@ document.addEventListener("DOMContentLoaded", () => {
       name: "لبن",
       calories: 61,
       protein: 3.2
-    }
+    },
 
+    pasta: {
+      name: "مكرونة مطبوخة",
+      calories: 157,
+      protein: 5.8
+    },
+
+    beef: {
+      name: "لحم بقري",
+      calories: 250,
+      protein: 26
+    },
+
+    cheese: {
+      name: "جبنة",
+      calories: 350,
+      protein: 25
+    }
   };
 
-  // =========================
-  // FOOD CALCULATOR
-  // =========================
-
-  function calculateFood(food, grams) {
-
-    if (!food || grams <= 0) {
-      return null;
-    }
-
-    return {
-
-      calories:
-        Math.round(
-          food.calories *
-          grams /
-          100
-        ),
-
-      protein:
-        Math.round(
-          food.protein *
-          grams /
-          100
-        )
-
-    };
-  }
-
   function detectFood(text) {
-
     const value =
-      text.toLowerCase();
+      String(text)
+        .toLowerCase()
+        .trim();
 
     if (
       value.includes("فراخ") ||
+      value.includes("دجاج") ||
       value.includes("chicken")
     ) {
       return foods.chicken;
@@ -570,872 +825,610 @@ document.addEventListener("DOMContentLoaded", () => {
       return foods.milk;
     }
 
+    if (
+      value.includes("مكرونة") ||
+      value.includes("مكرونه") ||
+      value.includes("pasta")
+    ) {
+      return foods.pasta;
+    }
+
+    if (
+      value.includes("لحمة") ||
+      value.includes("لحم") ||
+      value.includes("beef")
+    ) {
+      return foods.beef;
+    }
+
+    if (
+      value.includes("جبنة") ||
+      value.includes("جبنه") ||
+      value.includes("cheese")
+    ) {
+      return foods.cheese;
+    }
+
     return null;
   }
 
-  // =========================
-  // MEAL FORM
-  // =========================
+  function calculateFood(food, grams) {
+    if (!food || grams <= 0) {
+      return null;
+    }
+
+    return {
+      calories: Math.round(
+        food.calories * grams / 100
+      ),
+
+      protein: Math.round(
+        food.protein * grams / 100
+      )
+    };
+  }
+
+  // =========================================================
+  // FOOD FORM
+  // =========================================================
 
   const foodForm =
     $("#foodForm");
 
   if (foodForm) {
-
     foodForm.addEventListener(
       "submit",
       (event) => {
-
         event.preventDefault();
 
-        const foodText =
+        const foodName =
           $("#foodName")
             ?.value
-            ?.trim() || "";
+            ?.trim();
 
-        const grams =
-          getNumber("#foodGrams");
+        const caloriesInput =
+          $("#foodCalories");
+
+        const proteinInput =
+          $("#foodProtein");
 
         const food =
-          detectFood(foodText);
+          detectFood(foodName);
 
-        if (!food) {
+        const caloriesManual =
+          getNumber("#foodCalories");
 
+        const proteinManual =
+          getNumber("#foodProtein");
+
+        let calories =
+          caloriesManual;
+
+        let protein =
+          proteinManual;
+
+        if (food) {
+          const gramMatch =
+            foodName.match(
+              /(\d+(?:\.\d+)?)\s*(?:جرام|غرام|g|جم)?/i
+            );
+
+          if (gramMatch) {
+            const grams =
+              Number(gramMatch[1]);
+
+            const calculated =
+              calculateFood(
+                food,
+                grams
+              );
+
+            if (calculated) {
+              calories =
+                caloriesManual > 0
+                  ? caloriesManual
+                  : calculated.calories;
+
+              protein =
+                proteinManual > 0
+                  ? proteinManual
+                  : calculated.protein;
+            }
+          }
+        }
+
+        if (
+          calories <= 0 ||
+          protein < 0
+        ) {
           showMessage(
-            "اكتب اسم اكل معروف مثل فراخ او رز او بيض"
+            "اكتب السعرات والبروتين بشكل صحيح",
+            "error"
           );
 
           return;
         }
 
-        const result =
-          calculateFood(
-            food,
-            grams
-          );
+        const today =
+          getTodayData();
 
-        if (!result) {
+        today.calories += calories;
+        today.protein += protein;
 
-          showMessage(
-            "اكتب كمية صحيحة بالجرام"
-          );
-
-          return;
-        }
-
-        userData.today =
-          userData.today || {};
-
-        userData.today.calories =
-          Number(
-            userData.today.calories || 0
-          ) +
-          result.calories;
-
-        userData.today.protein =
-          Number(
-            userData.today.protein || 0
-          ) +
-          result.protein;
-
-        userData.today.meals =
-          userData.today.meals || [];
-
-        userData.today.meals.push({
-
-          food:
-            food.name,
-
-          grams,
-
-          calories:
-            result.calories,
-
-          protein:
-            result.protein,
-
+        today.meals.push({
+          name: foodName,
+          type:
+            $("#mealType")?.value ||
+            "meal",
+          calories,
+          protein,
           time:
             new Date().toISOString()
-
         });
 
         saveLocalData();
 
-        updateFoodDashboard();
+        updateDashboard();
 
-        showMessage(
-          `${food.name}: ${result.calories} kcal | ${result.protein}g protein`
-        );
+        closeModal("foodModal");
 
         foodForm.reset();
 
-      }
-    );
-  }
-
-  // =========================
-  // FOOD DASHBOARD
-  // =========================
-
-  function updateFoodDashboard() {
-
-    const today =
-      userData.today || {};
-
-    safeText(
-      "#todayCalories",
-      `${today.calories || 0} kcal`
-    );
-
-    safeText(
-      "#todayProtein",
-      `${today.protein || 0} g`
-    );
-
-    const result =
-      calculateCalories();
-
-    if (result) {
-
-      const remaining =
-        Math.max(
-          0,
-          result.calories -
-          Number(
-            today.calories || 0
-          )
-        );
-
-      safeText(
-        "#remainingCalories",
-        `${remaining} kcal`
-      );
-
-    }
-  }
-
-  // =========================
-  // QUICK FOOD BUTTONS
-  // =========================
-
-  $$(".food-btn").forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          const foodName =
-            button.dataset.food ||
-            button.textContent;
-
-          const food =
-            detectFood(foodName);
-
-          if (!food) return;
-
-          const grams =
-            Number(
-              button.dataset.grams ||
-              100
-            );
-
-          const result =
-            calculateFood(
-              food,
-              grams
-            );
-
-          if (!result) return;
-
-          userData.today =
-            userData.today || {};
-
-          userData.today.calories =
-            Number(
-              userData.today.calories || 0
-            ) +
-            result.calories;
-
-          userData.today.protein =
-            Number(
-              userData.today.protein || 0
-            ) +
-            result.protein;
-
-          userData.today.meals =
-            userData.today.meals || [];
-
-          userData.today.meals.push({
-
-            food:
-              food.name,
-
-            grams,
-
-            calories:
-              result.calories,
-
-            protein:
-              result.protein,
-
-            time:
-              new Date().toISOString()
-
-          });
-
-          saveLocalData();
-
-          updateFoodDashboard();
-
-          showMessage(
-            `تم تسجيل ${food.name}`
-          );
-
-        }
-      );
-
-    }
-  );
-
-  // =========================
-  // SLEEP
-  // =========================
-
-  const sleepStartBtn =
-    $("#sleepStartBtn");
-
-  const sleepEndBtn =
-    $("#sleepEndBtn");
-
-  if (sleepStartBtn) {
-
-    sleepStartBtn.addEventListener(
-      "click",
-      () => {
-
-        userData.sleepStart =
-          new Date().toISOString();
-
-        saveLocalData();
-
         showMessage(
-          "تم تسجيل وقت النوم"
+          "تم تسجيل الوجبة بنجاح",
+          "success"
         );
-
-        updateSleep();
-
       }
     );
-
-  }
-
-  if (sleepEndBtn) {
-
-    sleepEndBtn.addEventListener(
-      "click",
-      () => {
-
-        if (!userData.sleepStart) {
-
-          showMessage(
-            "سجل وقت النوم اولا"
-          );
-
-          return;
-        }
-
-        userData.sleepEnd =
-          new Date().toISOString();
-
-        saveLocalData();
-
-        updateSleep();
-
-        showMessage(
-          "تم تسجيل وقت الاستيقاظ"
-        );
-
-      }
-    );
-
-  }
-
-  function updateSleep() {
-
-    if (
-      !userData.sleepStart ||
-      !userData.sleepEnd
-    ) {
-      return;
-    }
-
-    const start =
-      new Date(
-        userData.sleepStart
-      );
-
-    const end =
-      new Date(
-        userData.sleepEnd
-      );
-
-    const hours =
-      (end - start) /
-      (1000 * 60 * 60);
-
-    if (hours >= 0) {
-
-      safeText(
-        "#sleepDuration",
-        `${hours.toFixed(1)} ساعة`
-      );
-
-    }
-  }
-
-  // =========================
-  // WATER
-  // =========================
-
-  let water =
-    Number(
-      localStorage.getItem(
-        "dr_elorabi_water"
-      ) || 0
-    );
-
-  function updateWater() {
-
-    safeText(
-      "#waterAmount",
-      `${water} ml`
-    );
-
-    safeText(
-      "#waterLiters",
-      `${(
-        water / 1000
-      ).toFixed(1)} L`
-    );
-
-  }
-
-  const waterBtn =
-    $("#waterBtn");
-
-  if (waterBtn) {
-
-    waterBtn.addEventListener(
-      "click",
-      () => {
-
-        water += 250;
-
-        localStorage.setItem(
-          "dr_elorabi_water",
-          water
-        );
-
-        updateWater();
-
-        showMessage(
-          "تم تسجيل 250 مل ماء"
-        );
-
-      }
-    );
-
-  }
-
-  // =========================
-  // STEPS
-  // =========================
-
-  const stepsInput =
-    $("#stepsInput");
-
-  const saveStepsBtn =
-    $("#saveStepsBtn");
-
-  if (saveStepsBtn) {
-
-    saveStepsBtn.addEventListener(
-      "click",
-      () => {
-
-        const steps =
-          Number(
-            stepsInput?.value || 0
-          );
-
-        userData.steps =
-          Math.max(
-            0,
-            steps
-          );
-
-        saveLocalData();
-
-        safeText(
-          "#stepsDisplay",
-          `${userData.steps} خطوة`
-        );
-
-        showMessage(
-          "تم تسجيل الخطوات"
-        );
-
-      }
-    );
-
-  }
-
-  // =========================
-  // WORKOUT
-  // =========================
-
-  $$(".workout-btn").forEach(
-    (button) => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          const workout =
-            button.dataset.workout ||
-            button.textContent;
-
-          userData.workouts =
-            userData.workouts || [];
-
-          userData.workouts.push({
-
-            name:
-              workout,
-
-            time:
-              new Date().toISOString()
-
-          });
-
-          saveLocalData();
-
-          showMessage(
-            `تم تسجيل تمرين: ${workout}`
-          );
-
-        }
-      );
-
-    }
-  );
-
-  // =========================
-  // DAILY PLAN
-  // =========================
-
-  function createDailyPlan() {
-
-    const result =
-      calculateCalories();
-
-    if (!result) {
-
-      showMessage(
-        "اكمل بياناتك الاول علشان نعمل الخطة"
-      );
-
-      return;
-    }
-
-    const calories =
-      result.calories;
-
-    const breakfast =
-      Math.round(
-        calories * 0.25
-      );
-
-    const lunch =
-      Math.round(
-        calories * 0.35
-      );
-
-    const dinner =
-      Math.round(
-        calories * 0.25
-      );
-
-    const dessert =
-      Math.round(
-        calories * 0.10
-      );
-
-    const snack =
-      Math.round(
-        calories * 0.05
-      );
-
-    const plan = {
-
-      breakfast,
-
-      lunch,
-
-      dinner,
-
-      dessert,
-
-      snack,
-
-      protein:
-        result.protein
-
-    };
-
-    userData.dailyPlan =
-      plan;
-
-    saveLocalData();
-
-    safeText(
-      "#breakfastCalories",
-      `${breakfast} kcal`
-    );
-
-    safeText(
-      "#lunchCalories",
-      `${lunch} kcal`
-    );
-
-    safeText(
-      "#dinnerCalories",
-      `${dinner} kcal`
-    );
-
-    safeText(
-      "#dessertCalories",
-      `${dessert} kcal`
-    );
-
-    safeText(
-      "#snackCalories",
-      `${snack} kcal`
-    );
-
-    showMessage(
-      "تم إنشاء خطة اليوم"
-    );
-
-  }
-
-  const generatePlanBtn =
-    $("#generatePlanBtn");
-
-  if (generatePlanBtn) {
-
-    generatePlanBtn.addEventListener(
-      "click",
-      createDailyPlan
-    );
-
-  }
-
-  // =========================
-  // BODY PROGRESS
-  // =========================
-
-  const progressForm =
-    $("#progressForm");
-
-  if (progressForm) {
-
-    progressForm.addEventListener(
-      "submit",
-      (event) => {
-
-        event.preventDefault();
-
-        const weight =
-          getNumber(
-            "#progressWeight"
-          );
-
-        if (weight <= 0) {
-
-          showMessage(
-            "اكتب الوزن الحالي"
-          );
-
-          return;
-        }
-
-        userData.progress =
-          userData.progress || [];
-
-        userData.progress.push({
-
-          weight,
-
-          date:
-            new Date().toISOString()
-
-        });
-
-        saveLocalData();
-
-        showMessage(
-          "تم تسجيل تقدمك"
-        );
-
-      }
-    );
-
-  }
-
-  // =========================
-  // PHOTO PROGRESS
-  // =========================
-
-  const photoInput =
-    $("#progressPhoto");
-
-  if (photoInput) {
-
-    photoInput.addEventListener(
-      "change",
-      (event) => {
-
-        const file =
-          event.target.files?.[0];
-
-        if (!file) return;
-
-        const reader =
-          new FileReader();
-
-        reader.onload =
-          () => {
-
-            userData.progressPhoto =
-              reader.result;
-
-            saveLocalData();
-
-            const preview =
-              $("#progressPhotoPreview");
-
-            if (preview) {
-
-              preview.src =
-                reader.result;
-
-              preview.style.display =
-                "block";
-
-            }
-
-            showMessage(
-              "تم حفظ صورة التقدم على الجهاز"
-            );
-
-          };
-
-        reader.readAsDataURL(file);
-
-      }
-    );
-
   }
 
   // =========================================================
-  // PRO REQUEST
+  // FOOD LIST
+  // =========================================================
+
+  function renderFoodList() {
+    const list =
+      $("#foodList");
+
+    if (!list) return;
+
+    const today =
+      getTodayData();
+
+    if (!today.meals?.length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          مفيش وجبات مسجلة لسه
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML =
+      today.meals
+        .map((meal) => `
+          <div class="food-item">
+            <div>
+              <strong>
+                ${escapeHTML(meal.name)}
+              </strong>
+
+              <small>
+                ${meal.calories} kcal
+                • ${meal.protein}g protein
+              </small>
+            </div>
+          </div>
+        `)
+        .join("");
+  }
+
+  function escapeHTML(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // =========================================================
+  // WATER
+  // =========================================================
+
+  function addWater(amount = 250) {
+    const today =
+      getTodayData();
+
+    today.water += amount;
+
+    saveLocalData();
+
+    updateDashboard();
+
+    showMessage(
+      `تم تسجيل ${amount} مل ماء`,
+      "success"
+    );
+  }
+
+  $("#waterBtn")?.addEventListener(
+    "click",
+    () => {
+      addWater(250);
+    }
+  );
+
+  $("#addWaterBtn")?.addEventListener(
+    "click",
+    () => {
+      addWater(250);
+    }
+  );
+
+  // =========================================================
+  // SLEEP
+  // =========================================================
+
+  $("#sleepForm")?.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
+
+      const start =
+        new Date(
+          $("#sleepTime").value
+        );
+
+      const end =
+        new Date(
+          $("#wakeTime").value
+        );
+
+      if (
+        Number.isNaN(start.getTime()) ||
+        Number.isNaN(end.getTime())
+      ) {
+        showMessage(
+          "اختار وقت النوم والاستيقاظ",
+          "error"
+        );
+
+        return;
+      }
+
+      if (end <= start) {
+        end.setDate(
+          end.getDate() + 1
+        );
+      }
+
+      const hours =
+        (end - start) /
+        (1000 * 60 * 60);
+
+      const today =
+        getTodayData();
+
+      today.sleep = {
+        start: start.toISOString(),
+        end: end.toISOString(),
+        hours
+      };
+
+      saveLocalData();
+
+      const result =
+        $("#sleepResult");
+
+      if (result) {
+        result.innerHTML = `
+          <div class="sleep-result">
+            نومك: <strong>
+              ${hours.toFixed(1)} ساعة
+            </strong>
+          </div>
+        `;
+      }
+
+      showMessage(
+        "تم تسجيل النوم بنجاح",
+        "success"
+      );
+    }
+  );
+
+  // =========================================================
+  // EXERCISE
+  // =========================================================
+
+  $("#exerciseForm")?.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
+
+      const name =
+        $("#exerciseName")
+          ?.value
+          ?.trim();
+
+      const duration =
+        getNumber(
+          "#exerciseDuration"
+        );
+
+      const calories =
+        getNumber(
+          "#exerciseCalories"
+        );
+
+      if (
+        !name ||
+        duration <= 0
+      ) {
+        showMessage(
+          "اكتب بيانات التمرين بشكل صحيح",
+          "error"
+        );
+
+        return;
+      }
+
+      const today =
+        getTodayData();
+
+      today.exercises.push({
+        name,
+        duration,
+        calories,
+        time:
+          new Date().toISOString()
+      });
+
+      saveLocalData();
+
+      closeModal("exerciseModal");
+
+      $("#exerciseForm").reset();
+
+      showMessage(
+        "تم تسجيل التمرين بنجاح",
+        "success"
+      );
+    }
+  );
+
+  // =========================================================
+  // MODALS
+  // =========================================================
+
+  function openModal(id) {
+    const modal = $(`#${id}`);
+
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
+  }
+
+  function closeModal(id) {
+    const modal = $(`#${id}`);
+
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+  }
+
+  $("#logFoodBtn")?.addEventListener(
+    "click",
+    () => openModal("foodModal")
+  );
+
+  $("#sleepBtn")?.addEventListener(
+    "click",
+    () => openModal("sleepModal")
+  );
+
+  $("#exerciseBtn")?.addEventListener(
+    "click",
+    () => openModal("exerciseModal")
+  );
+
+  $("#proBtn")?.addEventListener(
+    "click",
+    () => openModal("proModal")
+  );
+
+  $$(".close-modal").forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const id =
+            button.dataset.close;
+
+          if (id) {
+            closeModal(id);
+          }
+        }
+      );
+    }
+  );
+
+  $$(".modal").forEach(
+    (modal) => {
+      modal.addEventListener(
+        "click",
+        (event) => {
+          if (
+            event.target === modal
+          ) {
+            modal.classList.add(
+              "hidden"
+            );
+          }
+        }
+      );
+    }
+  );
+
+  // =========================================================
+  // PRO PAYMENT
   // =========================================================
 
   const requestProBtn =
     $("#requestProBtn");
 
-  const confirmPaymentBtn =
-    $("#confirmPaymentBtn");
-
   const paymentScreenshot =
     $("#paymentScreenshot");
 
-  if (requestProBtn) {
+  const confirmPaymentBtn =
+    $("#confirmPaymentBtn");
 
+  const paymentLink =
+    $("#paymentLink");
+
+  const proPaymentArea =
+    $("#proPaymentArea");
+
+  const proMessage =
+    $("#proMessage");
+
+  const PAYMENT_URL =
+    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
+
+  if (requestProBtn) {
     requestProBtn.addEventListener(
       "click",
-      async () => {
-
-        const name =
-          userData.name ||
-          $("#name")?.value?.trim() ||
-          "مستخدم";
-
-        const paymentLink =
-          "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
-
-        const message =
-          `أهلا ${name} 👋\n\n` +
-          `لتفعيل dr.elorabi PRO:\n\n` +
-          `💰 قيمة الاشتراك: 50 جنيه\n\n` +
-          `1️⃣ اضغط زر الدفع.\n` +
-          `2️⃣ قم بتحويل 50 جنيه.\n` +
-          `3️⃣ خذ Screenshot للتحويل.\n` +
-          `4️⃣ ارفع صورة التحويل.\n` +
-          `5️⃣ اضغط تأكيد الدفع.\n\n` +
-          `سيتم مراجعة التحويل من الإدارة.`;
-
-        safeText(
-          "#proMessage",
-          message
-        );
-
-        const paymentButton =
-          $("#paymentLink");
-
-        if (paymentButton) {
-
-          paymentButton.href =
-            paymentLink;
-
-          paymentButton.style.display =
-            "inline-block";
-
-          paymentButton.textContent =
-            "💳 ادفع 50 جنيه";
-
-          paymentButton.target =
-            "_blank";
-
+      () => {
+        if (proPaymentArea) {
+          proPaymentArea.classList.remove(
+            "hidden"
+          );
         }
 
-        if (paymentScreenshot) {
+        if (proMessage) {
+          proMessage.textContent =
+            `أهلا ${userData.name || "مستخدم"} 👋
 
-          paymentScreenshot.style.display =
+لتفعيل dr.elorabi PRO:
+
+💰 قيمة الاشتراك: 50 جنيه
+
+1️⃣ اضغط زر الدفع.
+2️⃣ حول 50 جنيه.
+3️⃣ خذ Screenshot للتحويل.
+4️⃣ ارفع صورة التحويل.
+5️⃣ اضغط تأكيد الدفع.
+
+سيتم مراجعة التحويل من الإدارة.`;
+        }
+
+        if (paymentLink) {
+          paymentLink.href =
+            PAYMENT_URL;
+
+          paymentLink.style.display =
             "block";
+        }
 
+        showMessage(
+          "ادفع 50 جنيه ثم ارفع صورة التحويل"
+        );
+      }
+    );
+  }
+
+  if (paymentScreenshot) {
+    paymentScreenshot.addEventListener(
+      "change",
+      () => {
+        const file =
+          paymentScreenshot.files?.[0];
+
+        if (!file) return;
+
+        if (
+          !file.type.startsWith(
+            "image/"
+          )
+        ) {
+          showMessage(
+            "ارفع صورة فقط",
+            "error"
+          );
+
+          paymentScreenshot.value = "";
+
+          return;
+        }
+
+        if (
+          file.size >
+          5 * 1024 * 1024
+        ) {
+          showMessage(
+            "حجم الصورة أكبر من 5MB",
+            "error"
+          );
+
+          paymentScreenshot.value = "";
+
+          return;
         }
 
         if (confirmPaymentBtn) {
-
           confirmPaymentBtn.style.display =
-            "inline-block";
-
+            "block";
         }
 
-        userData.proRequest =
-          true;
-
-        userData.proRequestedAt =
-          new Date().toISOString();
-
-        saveLocalData();
-
         showMessage(
-          "تم تجهيز طلب PRO. ادفع ثم ارفع صورة التحويل."
+          "تم اختيار صورة التحويل"
         );
-
       }
     );
-
   }
 
-  // =========================================================
-  // PAYMENT CONFIRMATION
-  // =========================================================
-
   if (confirmPaymentBtn) {
-
     confirmPaymentBtn.addEventListener(
       "click",
       async () => {
-
         try {
-
-          // -------------------------
-          // CHECK SUPABASE
-          // -------------------------
-
           if (!supabaseClient) {
-
             showMessage(
-              "Supabase غير متصل."
+              "Supabase غير متصل",
+              "error"
             );
 
             return;
           }
-
-          // -------------------------
-          // CHECK LOGIN
-          // -------------------------
 
           const {
-            data: userDataResponse,
-            error: userError
+            data,
+            error
           } =
-            await supabaseClient.auth.getUser();
+            await supabaseClient.auth
+              .getUser();
 
           if (
-            userError ||
-            !userDataResponse?.user
+            error ||
+            !data?.user
           ) {
-
             showMessage(
-              "لازم تسجل دخول الأول."
+              "سجل دخولك أولا",
+              "error"
             );
 
             return;
           }
-
-          const user =
-            userDataResponse.user;
-
-          // -------------------------
-          // CHECK FILE
-          // -------------------------
 
           const file =
             paymentScreenshot?.files?.[0];
 
           if (!file) {
-
             showMessage(
-              "ارفع صورة التحويل أولا."
-            );
-
-            return;
-          }
-
-          // -------------------------
-          // CHECK IMAGE
-          // -------------------------
-
-          if (
-            !file.type.startsWith(
-              "image/"
-            )
-          ) {
-
-            showMessage(
-              "ارفع صورة فقط."
-            );
-
-            return;
-          }
-
-          // -------------------------
-          // CHECK SIZE
-          // -------------------------
-
-          if (
-            file.size >
-            5 * 1024 * 1024
-          ) {
-
-            showMessage(
-              "حجم الصورة يجب ألا يتجاوز 5MB."
+              "ارفع صورة التحويل أولا",
+              "error"
             );
 
             return;
@@ -1447,26 +1440,18 @@ document.addEventListener("DOMContentLoaded", () => {
           confirmPaymentBtn.textContent =
             "جاري إرسال الطلب...";
 
-          // -------------------------
-          // FILE EXTENSION
-          // -------------------------
+          const user =
+            data.user;
 
           const extension =
             file.name
               .split(".")
-              .pop() ||
+              .pop()
+              ?.toLowerCase() ||
             "jpg";
-
-          // -------------------------
-          // FILE PATH
-          // -------------------------
 
           const filePath =
             `${user.id}/${Date.now()}.${extension}`;
-
-          // -------------------------
-          // UPLOAD IMAGE
-          // -------------------------
 
           const {
             error: uploadError
@@ -1479,40 +1464,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 filePath,
                 file,
                 {
-                  cacheControl:
-                    "3600",
-
-                  upsert:
-                    false
+                  cacheControl: "3600",
+                  upsert: false
                 }
               );
 
           if (uploadError) {
-
             console.error(
-              "Upload error:",
               uploadError
             );
 
-            showMessage(
-              "حصل خطأ أثناء رفع صورة التحويل."
+            throw new Error(
+              "فشل رفع صورة التحويل"
             );
-
-            confirmPaymentBtn.disabled =
-              false;
-
-            confirmPaymentBtn.textContent =
-              "تأكيد الدفع";
-
-            return;
           }
 
-          // -------------------------
-          // GET IMAGE URL
-          // -------------------------
-
           const {
-            data: publicUrlData
+            data: publicData
           } =
             supabaseClient.storage
               .from(
@@ -1523,65 +1491,37 @@ document.addEventListener("DOMContentLoaded", () => {
               );
 
           const screenshotUrl =
-            publicUrlData?.publicUrl ||
+            publicData?.publicUrl ||
             filePath;
 
-          // -------------------------
-          // INSERT PAYMENT REQUEST
-          // -------------------------
-
           const {
-            error: insertError
+            error: dbError
           } =
             await supabaseClient
               .from(
                 "payment_requests"
               )
               .insert({
-
-                user_id:
-                  user.id,
-
-                amount:
-                  50,
-
+                user_id: user.id,
+                amount: 50,
                 payment_method:
                   "InstaPay",
-
                 transaction_reference:
                   null,
-
                 screenshot_url:
                   screenshotUrl,
-
-                status:
-                  "pending"
-
+                status: "pending"
               });
 
-          if (insertError) {
-
+          if (dbError) {
             console.error(
-              "Database error:",
-              insertError
+              dbError
             );
 
-            showMessage(
-              "تم رفع الصورة لكن لم يتم تسجيل طلب الدفع."
+            throw new Error(
+              "فشل تسجيل طلب الدفع"
             );
-
-            confirmPaymentBtn.disabled =
-              false;
-
-            confirmPaymentBtn.textContent =
-              "تأكيد الدفع";
-
-            return;
           }
-
-          // -------------------------
-          // SAVE LOCAL STATUS
-          // -------------------------
 
           userData.paymentStatus =
             "pending";
@@ -1591,38 +1531,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
           saveLocalData();
 
-          // -------------------------
-          // SUCCESS MESSAGE
-          // -------------------------
+          if (proMessage) {
+            proMessage.textContent =
+              `✅ تم إرسال طلب الدفع بنجاح.
 
-          safeText(
-            "#proMessage",
+سيتم مراجعة التحويل من الإدارة.
 
-            "✅ تم إرسال طلب الدفع بنجاح.\n\n" +
-            "سيتم مراجعة التحويل من الإدارة، " +
-            "وبعد الموافقة سيتم تفعيل PRO."
-          );
+بعد الموافقة سيتم تفعيل PRO.`;
+          }
 
           confirmPaymentBtn.textContent =
             "تم إرسال الطلب ✓";
 
-          confirmPaymentBtn.disabled =
-            true;
-
           showMessage(
-            "تم إرسال طلب PRO للإدارة بنجاح."
+            "تم إرسال طلب PRO للإدارة",
+            "success"
           );
 
         } catch (error) {
-
-          console.error(
-            "Payment error:",
-            error
-          );
-
-          showMessage(
-            "حدث خطأ غير متوقع."
-          );
+          console.error(error);
 
           confirmPaymentBtn.disabled =
             false;
@@ -1630,30 +1557,37 @@ document.addEventListener("DOMContentLoaded", () => {
           confirmPaymentBtn.textContent =
             "تأكيد الدفع";
 
+          showMessage(
+            error.message ||
+            "حدث خطأ غير متوقع",
+            "error"
+          );
         }
-
       }
     );
-
   }
 
-  // =========================
-  // SUPABASE AUTH
-  // =========================
+  // =========================================================
+  // SIGN UP
+  // =========================================================
 
   const signupForm =
     $("#signupForm");
 
-  if (
-    signupForm &&
-    supabaseClient
-  ) {
-
+  if (signupForm) {
     signupForm.addEventListener(
       "submit",
       async (event) => {
-
         event.preventDefault();
+
+        if (!supabaseClient) {
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
+
+          return;
+        }
 
         const email =
           $("#signupEmail")
@@ -1664,10 +1598,22 @@ document.addEventListener("DOMContentLoaded", () => {
           $("#signupPassword")
             ?.value;
 
-        if (!email || !password) {
-
+        if (
+          !email ||
+          !password
+        ) {
           showMessage(
-            "اكتب البريد وكلمة المرور"
+            "اكتب البريد وكلمة المرور",
+            "error"
+          );
+
+          return;
+        }
+
+        if (password.length < 6) {
+          showMessage(
+            "كلمة المرور لازم تكون 6 حروف أو أكثر",
+            "error"
           );
 
           return;
@@ -1676,48 +1622,62 @@ document.addEventListener("DOMContentLoaded", () => {
         const {
           error
         } =
-          await supabaseClient.auth.signUp({
-            email,
-            password
-          });
+          await supabaseClient.auth
+            .signUp({
+              email,
+              password
+            });
 
         if (error) {
-
           console.error(error);
 
           showMessage(
-            error.message
+            error.message,
+            "error"
           );
 
           return;
         }
 
         showMessage(
-          "تم إنشاء الحساب. راجع بريدك الإلكتروني إذا كان تأكيد البريد مفعلا."
+          "تم إنشاء الحساب بنجاح. لو طلب منك تأكيد البريد، راجع الإيميل.",
+          "success"
         );
 
+        $("#signupBox")
+          ?.classList.add(
+            "hidden"
+          );
+
+        $("#loginBox")
+          ?.classList.remove(
+            "hidden"
+          );
       }
     );
-
   }
 
-  // =========================
+  // =========================================================
   // LOGIN
-  // =========================
+  // =========================================================
 
   const loginForm =
     $("#loginForm");
 
-  if (
-    loginForm &&
-    supabaseClient
-  ) {
-
+  if (loginForm) {
     loginForm.addEventListener(
       "submit",
       async (event) => {
-
         event.preventDefault();
+
+        if (!supabaseClient) {
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
+
+          return;
+        }
 
         const email =
           $("#loginEmail")
@@ -1728,10 +1688,13 @@ document.addEventListener("DOMContentLoaded", () => {
           $("#loginPassword")
             ?.value;
 
-        if (!email || !password) {
-
+        if (
+          !email ||
+          !password
+        ) {
           showMessage(
-            "اكتب البريد وكلمة المرور"
+            "اكتب البريد وكلمة المرور",
+            "error"
           );
 
           return;
@@ -1742,85 +1705,73 @@ document.addEventListener("DOMContentLoaded", () => {
         } =
           await supabaseClient.auth
             .signInWithPassword({
-
               email,
-
               password
-
             });
 
         if (error) {
-
           console.error(error);
 
           showMessage(
-            error.message
+            error.message,
+            "error"
           );
 
           return;
         }
 
         showMessage(
-          "تم تسجيل الدخول بنجاح"
+          "تم تسجيل الدخول بنجاح",
+          "success"
         );
 
         await loadCurrentUser();
-
       }
     );
-
   }
 
-  // =========================
+  // =========================================================
   // LOGOUT
-  // =========================
+  // =========================================================
 
-  const logoutBtn =
-    $("#logoutBtn");
-
-  if (
-    logoutBtn &&
-    supabaseClient
-  ) {
-
-    logoutBtn.addEventListener(
-      "click",
-      async () => {
-
-        const {
-          error
-        } =
-          await supabaseClient.auth
-            .signOut();
-
-        if (error) {
-
-          showMessage(
-            error.message
-          );
-
-          return;
-        }
-
-        showMessage(
-          "تم تسجيل الخروج"
-        );
-
+  $("#logoutBtn")?.addEventListener(
+    "click",
+    async () => {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
       }
-    );
 
-  }
+      userData = {};
 
-  // =========================
-  // CURRENT USER
-  // =========================
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+
+      showScreen("authScreen");
+
+      showMessage(
+        "تم تسجيل الخروج",
+        "success"
+      );
+    }
+  );
+
+  // =========================================================
+  // LOAD CURRENT USER
+  // =========================================================
 
   async function loadCurrentUser() {
+    if (!supabaseClient) {
+      if (userData.profileCompleted) {
+        showDashboard();
+      } else {
+        showScreen("authScreen");
+      }
 
-    if (!supabaseClient) return;
+      return;
+    }
 
     try {
-
       const {
         data
       } =
@@ -1830,44 +1781,140 @@ document.addEventListener("DOMContentLoaded", () => {
       const user =
         data?.user;
 
-      if (!user) return;
+      if (!user) {
+        showScreen("authScreen");
+        return;
+      }
 
-      safeText(
-        "#userEmail",
-        user.email || ""
+      await loadProfileFromSupabase(
+        user
       );
+
+      if (
+        userData.profileCompleted
+      ) {
+        showDashboard();
+      } else {
+        showProfile();
+      }
 
     } catch (error) {
+      console.error(error);
 
-      console.error(
-        "User loading error:",
-        error
-      );
-
+      if (
+        userData.profileCompleted
+      ) {
+        showDashboard();
+      } else {
+        showScreen("authScreen");
+      }
     }
-
   }
 
-  // =========================
-  // REALTIME CLOCK
-  // =========================
+  // =========================================================
+  // LOAD PROFILE FROM SUPABASE
+  // =========================================================
 
-  function updateClock() {
+  async function loadProfileFromSupabase(user) {
+    if (!supabaseClient) return;
 
-    const now =
-      new Date();
+    try {
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .maybeSingle();
 
-    const time =
-      now.toLocaleTimeString(
-        "ar-EG",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }
-      );
+      if (error) {
+        console.warn(
+          "Profile load:",
+          error
+        );
 
-    const date =
+        return;
+      }
+
+      if (!data) return;
+
+      userData.name =
+        data.full_name ||
+        userData.name ||
+        "";
+
+      userData.birthDate =
+        data.birth_date ||
+        userData.birthDate ||
+        "";
+
+      userData.gender =
+        data.gender ||
+        userData.gender ||
+        "";
+
+      userData.height =
+        data.height ||
+        userData.height ||
+        "";
+
+      userData.weight =
+        data.weight ||
+        userData.weight ||
+        "";
+
+      userData.goal =
+        data.goal ||
+        userData.goal ||
+        "";
+
+      userData.activity =
+        data.activity ||
+        userData.activity ||
+        "";
+
+      userData.likedFoods =
+        data.liked_foods ||
+        "";
+
+      userData.dislikedFoods =
+        data.disliked_foods ||
+        "";
+
+      userData.allergies =
+        data.allergies ||
+        "";
+
+      userData.mealsPerDay =
+        data.meals_per_day ||
+        4;
+
+      userData.profileCompleted =
+        Boolean(
+          data.full_name &&
+          data.birth_date &&
+          data.height &&
+          data.weight &&
+          data.goal
+        );
+
+      saveLocalData();
+
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+  // =========================================================
+  // DATE
+  // =========================================================
+
+  function updateDate() {
+    const now = new Date();
+
+    const text =
       now.toLocaleDateString(
         "ar-EG",
         {
@@ -1879,15 +1926,37 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
     safeText(
+      "#todayText",
+      text
+    );
+  }
+
+  // =========================================================
+  // LIVE CLOCK
+  // =========================================================
+
+  function updateClock() {
+    const now = new Date();
+
+    safeText(
       "#liveClock",
-      time
+      now.toLocaleTimeString(
+        "ar-EG"
+      )
     );
 
     safeText(
       "#todayDate",
-      date
+      now.toLocaleDateString(
+        "ar-EG",
+        {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        }
+      )
     );
-
   }
 
   setInterval(
@@ -1895,189 +1964,52 @@ document.addEventListener("DOMContentLoaded", () => {
     1000
   );
 
-  // =========================
-  // MEAL TIMER
-  // =========================
+  // =========================================================
+  // LIVE PROFILE CALCULATION
+  // =========================================================
 
-  function getNextMealTime() {
+  [
+    "#weight",
+    "#height",
+    "#birthDate",
+    "#gender",
+    "#goal",
+    "#activity"
+  ].forEach(
+    (selector) => {
+      const element = $(selector);
 
-    const wakeTime =
-      userData.wakeTime;
+      if (!element) return;
 
-    if (!wakeTime) return;
-
-    const wake =
-      new Date(wakeTime);
-
-    const next =
-      new Date(wake);
-
-    next.setHours(
-      next.getHours() + 3
-    );
-
-    safeText(
-      "#nextMealTime",
-      next.toLocaleTimeString(
-        "ar-EG",
-        {
-          hour: "2-digit",
-          minute: "2-digit"
+      element.addEventListener(
+        "input",
+        () => {
+          updateDashboard();
         }
-      )
-    );
-
-  }
-
-  const wakeBtn =
-    $("#wakeBtn");
-
-  if (wakeBtn) {
-
-    wakeBtn.addEventListener(
-      "click",
-      () => {
-
-        userData.wakeTime =
-          new Date().toISOString();
-
-        saveLocalData();
-
-        getNextMealTime();
-
-        showMessage(
-          "تم تسجيل وقت الاستيقاظ وبدأ حساب يومك من دلوقتي"
-        );
-
-      }
-    );
-
-  }
-
-  // =========================
-  // INITIAL LOAD
-  // =========================
-
-  function loadSavedData() {
-
-    if (userData.name) {
-
-      const name =
-        $("#name");
-
-      if (name) {
-        name.value =
-          userData.name;
-      }
-
-    }
-
-    if (userData.birthDate) {
-
-      const birth =
-        $("#birthDate");
-
-      if (birth) {
-        birth.value =
-          userData.birthDate;
-      }
-
-    }
-
-    if (userData.weight) {
-
-      const weight =
-        $("#weight");
-
-      if (weight) {
-        weight.value =
-          userData.weight;
-      }
-
-    }
-
-    if (userData.height) {
-
-      const height =
-        $("#height");
-
-      if (height) {
-        height.value =
-          userData.height;
-      }
-
-    }
-
-    if (userData.goal) {
-
-      const goal =
-        $("#goal");
-
-      if (goal) {
-        goal.value =
-          userData.goal;
-      }
-
-    }
-
-    if (userData.activity) {
-
-      const activity =
-        $("#activityLevel");
-
-      if (activity) {
-        activity.value =
-          userData.activity;
-      }
-
-    }
-
-    updateDashboard();
-
-    updateFoodDashboard();
-
-    updateSleep();
-
-    updateWater();
-
-    if (userData.steps) {
-
-      safeText(
-        "#stepsDisplay",
-        `${userData.steps} خطوة`
       );
 
+      element.addEventListener(
+        "change",
+        () => {
+          updateDashboard();
+        }
+      );
     }
+  );
 
-    if (userData.progressPhoto) {
+  // =========================================================
+  // INITIAL
+  // =========================================================
 
-      const preview =
-        $("#progressPhotoPreview");
+  loadProfileInputs();
 
-      if (preview) {
-
-        preview.src =
-          userData.progressPhoto;
-
-        preview.style.display =
-          "block";
-
-      }
-
-    }
-
-    getNextMealTime();
-
-    updateClock();
-
-  }
-
-  loadSavedData();
+  updateDate();
+  updateClock();
+  updateDashboard();
 
   loadCurrentUser();
 
   console.log(
     "dr.elorabi application loaded successfully."
   );
-
 });
