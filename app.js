@@ -10,16 +10,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const SUPABASE_KEY =
     "sb_publishable_HYnTEROkcBw7lrIKKNl21A_fmi1TsQV";
 
+  const ADMIN_EMAIL =
+    "fhddhd3gc@gmail.com";
+
+  const PAYMENT_URL =
+    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
+
   let supabaseClient = null;
 
   if (window.supabase) {
     try {
-      supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
+      supabaseClient =
+        window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        );
     } catch (error) {
-      console.error("Supabase initialization error:", error);
+      console.error(
+        "Supabase initialization error:",
+        error
+      );
     }
   }
 
@@ -32,62 +42,88 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(selector);
 
   const $$ = (selector) =>
-    Array.from(document.querySelectorAll(selector));
+    Array.from(
+      document.querySelectorAll(selector)
+    );
 
 
   function safeText(selector, value) {
+
     const element = $(selector);
 
     if (element) {
       element.textContent = value;
     }
+
   }
 
 
-  function getNumber(selector, fallback = 0) {
+  function getNumber(
+    selector,
+    fallback = 0
+  ) {
+
     const element = $(selector);
 
     if (!element) {
       return fallback;
     }
 
-    const value = Number(element.value);
+    const value =
+      Number(element.value);
 
     return Number.isFinite(value)
       ? value
       : fallback;
+
   }
 
 
-  function showMessage(message, type = "info") {
+  function showMessage(
+    message,
+    type = "info"
+  ) {
 
-    let box = $("#appMessage");
+    let box =
+      $("#appMessage");
 
     if (!box) {
 
-      box = document.createElement("div");
+      box =
+        document.createElement(
+          "div"
+        );
 
-      box.id = "appMessage";
+      box.id =
+        "appMessage";
 
-      Object.assign(box.style, {
-        position: "fixed",
-        bottom: "20px",
-        left: "20px",
-        right: "20px",
-        zIndex: "99999",
-        padding: "15px",
-        borderRadius: "14px",
-        background: "#111827",
-        color: "#fff",
-        textAlign: "center",
-        fontWeight: "700",
-        boxShadow: "0 10px 30px rgba(0,0,0,.25)"
-      });
+      Object.assign(
+        box.style,
+        {
+          position: "fixed",
+          bottom: "20px",
+          left: "20px",
+          right: "20px",
+          zIndex: "99999",
+          padding: "15px",
+          borderRadius: "14px",
+          background: "#111827",
+          color: "#fff",
+          textAlign: "center",
+          fontWeight: "700",
+          boxShadow:
+            "0 10px 30px rgba(0,0,0,.25)"
+        }
+      );
 
-      document.body.appendChild(box);
+      document.body.appendChild(
+        box
+      );
+
     }
 
-    box.textContent = message;
+    box.textContent =
+      message;
 
     box.style.background =
       type === "error"
@@ -96,44 +132,93 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? "#15803d"
         : "#111827";
 
-    clearTimeout(box._timer);
+    clearTimeout(
+      box._timer
+    );
 
-    box._timer = setTimeout(() => {
-      box.remove();
-    }, 4000);
+    box._timer =
+      setTimeout(() => {
+
+        if (box) {
+          box.remove();
+        }
+
+      }, 4000);
+
   }
 
 
   function showScreen(id) {
 
-    $$(".screen").forEach((screen) => {
-      screen.classList.add("hidden");
-    });
+    $$(".screen").forEach(
+      (screen) => {
 
-    const screen = $(`#${id}`);
+        screen.classList.add(
+          "hidden"
+        );
+
+      }
+    );
+
+    const screen =
+      $(`#${id}`);
 
     if (screen) {
-      screen.classList.remove("hidden");
+      screen.classList.remove(
+        "hidden"
+      );
     }
+
   }
 
 
   function todayKey() {
 
-    const now = new Date();
+    const now =
+      new Date();
 
     const year =
       now.getFullYear();
 
     const month =
-      String(now.getMonth() + 1)
-        .padStart(2, "0");
+      String(
+        now.getMonth() + 1
+      ).padStart(2, "0");
 
     const day =
-      String(now.getDate())
-        .padStart(2, "0");
+      String(
+        now.getDate()
+      ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
+
+  }
+
+
+  function escapeHTML(text) {
+
+    return String(text ?? "")
+      .replaceAll(
+        "&",
+        "&amp;"
+      )
+      .replaceAll(
+        "<",
+        "&lt;"
+      )
+      .replaceAll(
+        ">",
+        "&gt;"
+      )
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
+
   }
 
 
@@ -150,7 +235,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     userData =
       JSON.parse(
-        localStorage.getItem(STORAGE_KEY) || "{}"
+        localStorage.getItem(
+          STORAGE_KEY
+        ) || "{}"
       );
 
   } catch {
@@ -164,7 +251,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify(userData)
+      JSON.stringify(
+        userData
+      )
     );
 
   }
@@ -174,16 +263,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   // AGE
   // =========================================================
 
-  function calculateAge(dateString) {
+  function calculateAge(
+    dateString
+  ) {
 
     if (!dateString) {
       return 0;
     }
 
     const birth =
-      new Date(dateString);
+      new Date(
+        dateString
+      );
 
-    if (Number.isNaN(birth.getTime())) {
+    if (
+      Number.isNaN(
+        birth.getTime()
+      )
+    ) {
       return 0;
     }
 
@@ -202,13 +299,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       month < 0 ||
       (
         month === 0 &&
-        today.getDate() < birth.getDate()
+        today.getDate() <
+          birth.getDate()
       )
     ) {
       age--;
     }
 
-    return Math.max(0, age);
+    return Math.max(
+      0,
+      age
+    );
+
   }
 
 
@@ -220,11 +322,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const weight =
       userData.weight ||
-      getNumber("#weight");
+      getNumber(
+        "#weight"
+      );
 
     const height =
       userData.height ||
-      getNumber("#height");
+      getNumber(
+        "#height"
+      );
 
     if (
       weight <= 0 ||
@@ -238,8 +344,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return (
       weight /
-      (heightMeters * heightMeters)
+      (
+        heightMeters *
+        heightMeters
+      )
     );
+
   }
 
 
@@ -258,6 +368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     return "سمنة";
+
   }
 
 
@@ -272,13 +383,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       $("#activity")?.value;
 
     const values = {
+
       sedentary: 1.2,
+
       light: 1.375,
+
       moderate: 1.55,
+
       high: 1.725
+
     };
 
-    return values[activity] || 1.2;
+    return (
+      values[activity] ||
+      1.2
+    );
+
   }
 
 
@@ -286,11 +406,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const weight =
       userData.weight ||
-      getNumber("#weight");
+      getNumber(
+        "#weight"
+      );
 
     const height =
       userData.height ||
-      getNumber("#height");
+      getNumber(
+        "#height"
+      );
 
     const birthDate =
       userData.birthDate ||
@@ -308,7 +432,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       "maintenance";
 
     const age =
-      calculateAge(birthDate);
+      calculateAge(
+        birthDate
+      );
 
     if (
       weight <= 0 ||
@@ -320,7 +446,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let bmr;
 
-    if (gender === "female") {
+    if (
+      gender === "female"
+    ) {
 
       bmr =
         (10 * weight) +
@@ -339,43 +467,80 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const maintenance =
-      bmr * getActivityMultiplier();
+      bmr *
+      getActivityMultiplier();
 
     let calories =
       maintenance;
 
-    if (goal === "fat_loss") {
+    if (
+      goal === "fat_loss"
+    ) {
+
       calories =
         maintenance - 400;
+
     }
 
-    if (goal === "muscle_gain") {
+    if (
+      goal === "muscle_gain"
+    ) {
+
       calories =
         maintenance + 250;
+
     }
 
-    if (goal === "recomposition") {
+    if (
+      goal === "recomposition"
+    ) {
+
       calories =
         maintenance - 150;
+
     }
 
     calories =
-      Math.max(1200, calories);
+      Math.max(
+        1200,
+        calories
+      );
 
     const protein =
-      Math.round(weight * 1.8);
+      Math.round(
+        weight * 1.8
+      );
 
     const water =
-      Math.round(weight * 35);
+      Math.round(
+        weight * 35
+      );
 
     return {
+
       age,
-      bmr: Math.round(bmr),
-      maintenance: Math.round(maintenance),
-      calories: Math.round(calories),
+
+      bmr:
+        Math.round(
+          bmr
+        ),
+
+      maintenance:
+        Math.round(
+          maintenance
+        ),
+
+      calories:
+        Math.round(
+          calories
+        ),
+
       protein,
+
       water
+
     };
+
   }
 
 
@@ -392,20 +557,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       userData.daily = {};
     }
 
-    if (!userData.daily[key]) {
+    if (
+      !userData.daily[key]
+    ) {
 
       userData.daily[key] = {
+
         calories: 0,
+
         protein: 0,
+
         water: 0,
+
         meals: [],
+
         exercises: [],
+
         sleep: null
+
       };
 
     }
 
     return userData.daily[key];
+
   }
 
 
@@ -485,13 +660,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const caloriePercent =
       Math.min(
         100,
-        (today.calories / result.calories) * 100
+        (
+          today.calories /
+          result.calories
+        ) * 100
       );
 
     const proteinPercent =
       Math.min(
         100,
-        (today.protein / result.protein) * 100
+        (
+          today.protein /
+          result.protein
+        ) * 100
       );
 
     const calorieBar =
@@ -501,18 +682,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       $("#proteinProgress");
 
     if (calorieBar) {
+
       calorieBar.style.width =
         `${caloriePercent}%`;
+
     }
 
     if (proteinBar) {
+
       proteinBar.style.width =
         `${proteinPercent}%`;
+
     }
 
     renderFoodList();
 
     saveLocalData();
+
   }
 
 
@@ -537,22 +723,30 @@ document.addEventListener("DOMContentLoaded", async () => {
             .trim();
 
         const birthDate =
-          $("#birthDate")?.value;
+          $("#birthDate")
+            ?.value;
 
         const gender =
-          $("#gender")?.value;
+          $("#gender")
+            ?.value;
 
         const height =
-          getNumber("#height");
+          getNumber(
+            "#height"
+          );
 
         const weight =
-          getNumber("#weight");
+          getNumber(
+            "#weight"
+          );
 
         const goal =
-          $("#goal")?.value;
+          $("#goal")
+            ?.value;
 
         const activity =
-          $("#activity")?.value;
+          $("#activity")
+            ?.value;
 
         const likedFoods =
           $("#likedFoods")
@@ -571,7 +765,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const mealsPerDay =
           Number(
-            $("#mealsPerDay")?.value || 4
+            $(
+              "#mealsPerDay"
+            )?.value || 4
           );
 
         if (
@@ -590,6 +786,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           );
 
           return;
+
         }
 
         userData.name =
@@ -658,9 +855,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
 
       const {
-        data
+        data,
+        error
       } =
-        await supabaseClient.auth.getUser();
+        await supabaseClient.auth
+          .getUser();
+
+      if (error) {
+        console.warn(error);
+        return;
+      }
 
       const user =
         data?.user;
@@ -671,7 +875,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const profile = {
 
-        id: user.id,
+        id:
+          user.id,
 
         email:
           user.email,
@@ -714,13 +919,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const result =
         await supabaseClient
           .from("profiles")
-          .upsert(profile);
+          .upsert(
+            profile
+          );
 
       if (result.error) {
+
         console.warn(
           "Profile save:",
           result.error
         );
+
       }
 
     } catch (error) {
@@ -731,6 +940,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
     }
+
   }
 
 
@@ -753,6 +963,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateDashboard();
 
     updateDate();
+
+    if (
+      userData.isAdmin
+    ) {
+
+      $("#adminBtn")
+        ?.classList.remove(
+          "hidden"
+        );
+
+    }
+
   }
 
 
@@ -763,6 +985,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
 
     loadProfileInputs();
+
   }
 
 
@@ -822,6 +1045,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       $("#mealsPerDay").value =
         userData.mealsPerDay;
     }
+
   }
 
 
@@ -1017,6 +1241,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     return null;
+
   }
 
 
@@ -1036,13 +1261,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           ?.trim();
 
       const food =
-        detectFood(foodName);
+        detectFood(
+          foodName
+        );
 
       let calories =
-        getNumber("#foodCalories");
+        getNumber(
+          "#foodCalories"
+        );
 
       let protein =
-        getNumber("#foodProtein");
+        getNumber(
+          "#foodProtein"
+        );
 
       if (food) {
 
@@ -1058,7 +1289,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               gramMatch[1]
             );
 
-          if (calories <= 0) {
+          if (
+            calories <= 0
+          ) {
 
             calories =
               Math.round(
@@ -1069,7 +1302,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           }
 
-          if (protein <= 0) {
+          if (
+            protein <= 0
+          ) {
 
             protein =
               Math.round(
@@ -1079,7 +1314,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               );
 
           }
+
         }
+
       }
 
       if (
@@ -1093,6 +1330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
         return;
+
       }
 
       const today =
@@ -1110,7 +1348,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           foodName,
 
         type:
-          $("#mealType")?.value ||
+          $("#mealType")
+            ?.value ||
           "meal",
 
         calories,
@@ -1118,7 +1357,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         protein,
 
         time:
-          new Date().toISOString()
+          new Date()
+            .toISOString()
 
       });
 
@@ -1145,18 +1385,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // FOOD LIST
   // =========================================================
 
-  function escapeHTML(text) {
-
-    return String(text)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
   function renderFoodList() {
 
     const list =
@@ -1169,7 +1397,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const today =
       getTodayData();
 
-    if (!today.meals?.length) {
+    if (
+      !today.meals?.length
+    ) {
 
       list.innerHTML = `
         <div class="empty-state">
@@ -1178,6 +1408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
 
       return;
+
     }
 
     list.innerHTML =
@@ -1190,18 +1421,23 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div>
 
               <strong>
-                ${escapeHTML(meal.name)}
+                ${escapeHTML(
+                  meal.name
+                )}
               </strong>
 
               <small>
-                ${meal.calories} kcal
+                ${meal.calories}
+                kcal
                 •
-                ${meal.protein}g protein
+                ${meal.protein}
+                g protein
               </small>
 
             </div>
 
           </div>
+
         `
         )
         .join("");
@@ -1213,7 +1449,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // WATER
   // =========================================================
 
-  function addWater(amount = 250) {
+  function addWater(
+    amount = 250
+  ) {
 
     const today =
       getTodayData();
@@ -1229,187 +1467,205 @@ document.addEventListener("DOMContentLoaded", async () => {
       `تم تسجيل ${amount} مل ماء`,
       "success"
     );
+
   }
 
 
-  $("#waterBtn")?.addEventListener(
-    "click",
-    () => {
-      addWater(250);
-    }
-  );
+  $("#waterBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        addWater(250);
+      }
+    );
 
 
-  $("#addWaterBtn")?.addEventListener(
-    "click",
-    () => {
-      addWater(250);
-    }
-  );
+  $("#addWaterBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        addWater(250);
+      }
+    );
 
 
   // =========================================================
   // SLEEP
   // =========================================================
 
-  $("#sleepForm")?.addEventListener(
-    "submit",
-    (event) => {
+  $("#sleepForm")
+    ?.addEventListener(
+      "submit",
+      (event) => {
 
-      event.preventDefault();
+        event.preventDefault();
 
-      const start =
-        new Date(
-          $("#sleepTime").value
-        );
+        const start =
+          new Date(
+            $("#sleepTime")
+              .value
+          );
 
-      const end =
-        new Date(
-          $("#wakeTime").value
-        );
+        const end =
+          new Date(
+            $("#wakeTime")
+              .value
+          );
 
-      if (
-        Number.isNaN(start.getTime()) ||
-        Number.isNaN(end.getTime())
-      ) {
+        if (
+          Number.isNaN(
+            start.getTime()
+          ) ||
+          Number.isNaN(
+            end.getTime()
+          )
+        ) {
+
+          showMessage(
+            "اختار وقت النوم والاستيقاظ",
+            "error"
+          );
+
+          return;
+
+        }
+
+        if (
+          end <= start
+        ) {
+
+          end.setDate(
+            end.getDate() + 1
+          );
+
+        }
+
+        const hours =
+          (
+            end - start
+          ) /
+          (
+            1000 *
+            60 *
+            60
+          );
+
+        const today =
+          getTodayData();
+
+        today.sleep = {
+
+          start:
+            start.toISOString(),
+
+          end:
+            end.toISOString(),
+
+          hours
+
+        };
+
+        saveLocalData();
+
+        const result =
+          $("#sleepResult");
+
+        if (result) {
+
+          result.innerHTML = `
+            <div class="sleep-result">
+              نومك:
+              <strong>
+                ${hours.toFixed(1)}
+                ساعة
+              </strong>
+            </div>
+          `;
+
+        }
 
         showMessage(
-          "اختار وقت النوم والاستيقاظ",
-          "error"
-        );
-
-        return;
-      }
-
-      if (end <= start) {
-
-        end.setDate(
-          end.getDate() + 1
+          "تم تسجيل النوم بنجاح",
+          "success"
         );
 
       }
-
-      const hours =
-        (
-          end - start
-        ) /
-        (
-          1000 *
-          60 *
-          60
-        );
-
-      const today =
-        getTodayData();
-
-      today.sleep = {
-
-        start:
-          start.toISOString(),
-
-        end:
-          end.toISOString(),
-
-        hours
-
-      };
-
-      saveLocalData();
-
-      const result =
-        $("#sleepResult");
-
-      if (result) {
-
-        result.innerHTML = `
-          <div class="sleep-result">
-            نومك:
-            <strong>
-              ${hours.toFixed(1)} ساعة
-            </strong>
-          </div>
-        `;
-
-      }
-
-      showMessage(
-        "تم تسجيل النوم بنجاح",
-        "success"
-      );
-
-    }
-  );
+    );
 
 
   // =========================================================
   // EXERCISE
   // =========================================================
 
-  $("#exerciseForm")?.addEventListener(
-    "submit",
-    (event) => {
+  $("#exerciseForm")
+    ?.addEventListener(
+      "submit",
+      (event) => {
 
-      event.preventDefault();
+        event.preventDefault();
 
-      const name =
-        $("#exerciseName")
-          ?.value
-          ?.trim();
+        const name =
+          $("#exerciseName")
+            ?.value
+            ?.trim();
 
-      const duration =
-        getNumber(
-          "#exerciseDuration"
+        const duration =
+          getNumber(
+            "#exerciseDuration"
+          );
+
+        const calories =
+          getNumber(
+            "#exerciseCalories"
+          );
+
+        if (
+          !name ||
+          duration <= 0
+        ) {
+
+          showMessage(
+            "اكتب بيانات التمرين بشكل صحيح",
+            "error"
+          );
+
+          return;
+
+        }
+
+        const today =
+          getTodayData();
+
+        today.exercises.push({
+
+          name,
+
+          duration,
+
+          calories,
+
+          time:
+            new Date()
+              .toISOString()
+
+        });
+
+        saveLocalData();
+
+        closeModal(
+          "exerciseModal"
         );
 
-      const calories =
-        getNumber(
-          "#exerciseCalories"
-        );
-
-      if (
-        !name ||
-        duration <= 0
-      ) {
+        $("#exerciseForm")
+          .reset();
 
         showMessage(
-          "اكتب بيانات التمرين بشكل صحيح",
-          "error"
+          "تم تسجيل التمرين بنجاح",
+          "success"
         );
 
-        return;
       }
-
-      const today =
-        getTodayData();
-
-      today.exercises.push({
-
-        name,
-
-        duration,
-
-        calories,
-
-        time:
-          new Date().toISOString()
-
-      });
-
-      saveLocalData();
-
-      closeModal(
-        "exerciseModal"
-      );
-
-      $("#exerciseForm").reset();
-
-      showMessage(
-        "تم تسجيل التمرين بنجاح",
-        "success"
-      );
-
-    }
-  );
+    );
 
 
   // =========================================================
@@ -1422,10 +1678,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       $(`#${id}`);
 
     if (modal) {
+
       modal.classList.remove(
         "hidden"
       );
+
     }
+
   }
 
 
@@ -1435,89 +1694,115 @@ document.addEventListener("DOMContentLoaded", async () => {
       $(`#${id}`);
 
     if (modal) {
+
       modal.classList.add(
         "hidden"
       );
+
     }
+
   }
 
 
-  $("#logFoodBtn")?.addEventListener(
-    "click",
-    () => openModal("foodModal")
-  );
+  $("#logFoodBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        openModal(
+          "foodModal"
+        );
+      }
+    );
 
 
-  $("#sleepBtn")?.addEventListener(
-    "click",
-    () => openModal("sleepModal")
-  );
+  $("#sleepBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        openModal(
+          "sleepModal"
+        );
+      }
+    );
 
 
-  $("#exerciseBtn")?.addEventListener(
-    "click",
-    () => openModal("exerciseModal")
-  );
+  $("#exerciseBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+        openModal(
+          "exerciseModal"
+        );
+      }
+    );
 
 
-  $("#proBtn")?.addEventListener(
-    "click",
-    () => openModal("proModal")
-  );
+  $("#proBtn")
+    ?.addEventListener(
+      "click",
+      async () => {
+
+        openModal(
+          "proModal"
+        );
+
+        await loadMyPaymentStatus();
+
+      }
+    );
 
 
-  $$(".close-modal").forEach(
-    (button) => {
+  $$(".close-modal")
+    .forEach(
+      (button) => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          const id =
-            button.dataset.close;
+            const id =
+              button.dataset.close;
 
-          if (id) {
-            closeModal(id);
+            if (id) {
+              closeModal(id);
+            }
+
           }
+        );
 
-        }
-      );
-
-    }
-  );
+      }
+    );
 
 
-  $$(".modal").forEach(
-    (modal) => {
+  $$(".modal")
+    .forEach(
+      (modal) => {
 
-      modal.addEventListener(
-        "click",
-        (event) => {
+        modal.addEventListener(
+          "click",
+          (event) => {
 
-          if (
-            event.target === modal
-          ) {
+            if (
+              event.target ===
+              modal
+            ) {
 
-            modal.classList.add(
-              "hidden"
-            );
+              modal.classList.add(
+                "hidden"
+              );
+
+            }
 
           }
+        );
 
-        }
-      );
-
-    }
-  );
+      }
+    );
 
 
   // =========================================================
-  // PRO PAYMENT
+  // PAYMENT UI
   // =========================================================
-
-  const PAYMENT_URL =
-    "https://ipn.eg/S/ahmed-6163/instapay/4RLjXi";
-
 
   const requestProBtn =
     $("#requestProBtn");
@@ -1538,61 +1823,110 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#proMessage");
 
 
-  if (requestProBtn) {
+  function showPaymentArea() {
 
-    requestProBtn.addEventListener(
-      "click",
-      async () => {
+    if (
+      proPaymentArea
+    ) {
 
-        /*
-          مهم:
-          بمجرد الضغط على طلب PRO
-          نحاول التأكد من وجود Session.
-        */
+      proPaymentArea.classList.remove(
+        "hidden"
+      );
 
-        if (!supabaseClient) {
+    }
 
-          showMessage(
-            "Supabase غير متصل",
-            "error"
-          );
+    if (
+      paymentLink
+    ) {
 
-          return;
-        }
+      paymentLink.href =
+        PAYMENT_URL;
 
-        const {
-          data: sessionData
-        } =
-          await supabaseClient.auth.getSession();
+      paymentLink.classList.remove(
+        "hidden"
+      );
 
-        if (!sessionData?.session) {
+    }
 
-          showMessage(
-            "سجل دخولك أولا قبل طلب PRO",
-            "error"
-          );
-
-          showScreen(
-            "authScreen"
-          );
-
-          return;
-        }
+  }
 
 
-        if (proPaymentArea) {
+  // =========================================================
+  // CHECK MY PAYMENT
+  // =========================================================
 
-          proPaymentArea.classList.remove(
-            "hidden"
-          );
+  async function loadMyPaymentStatus() {
 
-        }
+    if (!supabaseClient) {
+      return;
+    }
 
+    try {
 
-        if (proMessage) {
+      const {
+        data: sessionData
+      } =
+        await supabaseClient.auth
+          .getSession();
+
+      const session =
+        sessionData?.session;
+
+      if (!session) {
+        return;
+      }
+
+      const user =
+        session.user;
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "payment_requests"
+          )
+          .select(
+            "*"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          )
+          .limit(1)
+          .maybeSingle();
+
+      if (error) {
+
+        console.warn(
+          "Payment status:",
+          error
+        );
+
+        return;
+
+      }
+
+      if (!data) {
+
+        showPaymentArea();
+
+        if (
+          proMessage
+        ) {
 
           proMessage.textContent =
-`أهلا ${userData.name || "مستخدم"} 👋
+            `أهلا ${
+              userData.name ||
+              "مستخدم"
+            } 👋
 
 لتفعيل dr.elorabi PRO:
 
@@ -1608,18 +1942,227 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
+        if (
+          requestProBtn
+        ) {
 
-        if (paymentLink) {
-
-          paymentLink.href =
-            PAYMENT_URL;
-
-          paymentLink.classList.remove(
+          requestProBtn.classList.remove(
             "hidden"
           );
 
         }
 
+        return;
+
+      }
+
+
+      if (
+        data.status ===
+        "approved"
+      ) {
+
+        userData.pro =
+          true;
+
+        userData.paymentStatus =
+          "approved";
+
+        saveLocalData();
+
+        if (
+          proMessage
+        ) {
+
+          proMessage.innerHTML =
+            `
+              <div class="approved-box">
+                ✅ تم تفعيل PRO بنجاح
+                <br>
+                حسابك حاليا PRO
+              </div>
+            `;
+
+        }
+
+        if (
+          requestProBtn
+        ) {
+
+          requestProBtn.classList.add(
+            "hidden"
+          );
+
+        }
+
+        if (
+          confirmPaymentBtn
+        ) {
+
+          confirmPaymentBtn.classList.add(
+            "hidden"
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      if (
+        data.status ===
+        "pending"
+      ) {
+
+        showPaymentArea();
+
+        if (
+          proMessage
+        ) {
+
+          proMessage.innerHTML =
+            `
+              <div class="pending-box">
+                ⏳ طلب الدفع قيد المراجعة
+                <br>
+                استنى موافقة الإدارة.
+              </div>
+            `;
+
+        }
+
+        if (
+          requestProBtn
+        ) {
+
+          requestProBtn.classList.add(
+            "hidden"
+          );
+
+        }
+
+        return;
+
+      }
+
+
+      if (
+        data.status ===
+        "rejected"
+      ) {
+
+        showPaymentArea();
+
+        if (
+          proMessage
+        ) {
+
+          proMessage.innerHTML =
+            `
+              <div class="rejected-box">
+                ❌ تم رفض طلب الدفع
+                <br>
+                يمكنك إرسال طلب جديد.
+              </div>
+            `;
+
+        }
+
+        if (
+          requestProBtn
+        ) {
+
+          requestProBtn.classList.remove(
+            "hidden"
+          );
+
+        }
+
+        return;
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+    }
+
+  }
+
+
+  // =========================================================
+  // REQUEST PRO
+  // =========================================================
+
+  if (requestProBtn) {
+
+    requestProBtn.addEventListener(
+      "click",
+      async () => {
+
+        if (!supabaseClient) {
+
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
+
+          return;
+
+        }
+
+        const {
+          data: sessionData
+        } =
+          await supabaseClient.auth
+            .getSession();
+
+        if (
+          !sessionData?.session
+        ) {
+
+          showMessage(
+            "سجل دخولك أولا قبل طلب PRO",
+            "error"
+          );
+
+          showScreen(
+            "authScreen"
+          );
+
+          return;
+
+        }
+
+        showPaymentArea();
+
+        if (
+          proMessage
+        ) {
+
+          proMessage.textContent =
+            `أهلا ${
+              userData.name ||
+              "مستخدم"
+            } 👋
+
+لتفعيل dr.elorabi PRO:
+
+💰 قيمة الاشتراك: 50 جنيه
+
+1️⃣ اضغط زر الدفع.
+2️⃣ حول 50 جنيه.
+3️⃣ خذ Screenshot للتحويل.
+4️⃣ ارفع صورة التحويل.
+5️⃣ اضغط تأكيد الدفع.
+
+سيتم مراجعة التحويل من الإدارة.`;
+
+        }
 
         showMessage(
           "ادفع 50 جنيه ثم ارفع صورة التحويل",
@@ -1643,7 +2186,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => {
 
         const file =
-          paymentScreenshot.files?.[0];
+          paymentScreenshot
+            .files?.[0];
 
         if (!file) {
           return;
@@ -1664,8 +2208,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             "";
 
           return;
-        }
 
+        }
 
         if (
           file.size >
@@ -1681,10 +2225,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             "";
 
           return;
+
         }
 
-
-        if (confirmPaymentBtn) {
+        if (
+          confirmPaymentBtn
+        ) {
 
           confirmPaymentBtn.classList.remove(
             "hidden"
@@ -1707,7 +2253,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // CONFIRM PAYMENT
   // =========================================================
 
-  if (confirmPaymentBtn) {
+  if (
+    confirmPaymentBtn
+  ) {
 
     confirmPaymentBtn.addEventListener(
       "click",
@@ -1723,22 +2271,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             return;
+
           }
-
-
-          /*
-            الحل الأساسي للمشكلة:
-
-            نستخدم getSession()
-            بدل الاعتماد فقط على getUser().
-          */
 
           const {
             data: sessionData,
             error: sessionError
           } =
-            await supabaseClient.auth.getSession();
-
+            await supabaseClient.auth
+              .getSession();
 
           if (
             sessionError ||
@@ -1751,16 +2292,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             return;
+
           }
 
-
           const user =
-            sessionData.session.user;
-
+            sessionData
+              .session
+              .user;
 
           const file =
-            paymentScreenshot?.files?.[0];
-
+            paymentScreenshot
+              ?.files?.[0];
 
           if (!file) {
 
@@ -1770,8 +2312,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
             return;
-          }
 
+          }
 
           confirmPaymentBtn.disabled =
             true;
@@ -1792,9 +2334,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             `${user.id}/${Date.now()}.${extension}`;
 
 
-          /*
-            Upload screenshot
-          */
+          // -----------------------------------------
+          // UPLOAD
+          // -----------------------------------------
 
           const {
             error: uploadError
@@ -1807,8 +2349,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 filePath,
                 file,
                 {
-                  cacheControl: "3600",
-                  upsert: false
+                  cacheControl:
+                    "3600",
+
+                  upsert:
+                    false
                 }
               );
 
@@ -1827,30 +2372,42 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
 
-          /*
-            Public URL
-          */
+          // -----------------------------------------
+          // PRIVATE STORAGE URL
+          // -----------------------------------------
 
           const {
-            data: publicData
+            data: signedData,
+            error: signedError
           } =
-            supabaseClient.storage
+            await supabaseClient.storage
               .from(
                 "payment-screenshots"
               )
-              .getPublicUrl(
-                filePath
+              .createSignedUrl(
+                filePath,
+                60 * 60 * 24 * 30
               );
 
 
+          if (signedError) {
+
+            console.warn(
+              "Signed URL:",
+              signedError
+            );
+
+          }
+
+
           const screenshotUrl =
-            publicData?.publicUrl ||
+            signedData?.signedUrl ||
             filePath;
 
 
-          /*
-            Insert payment request
-          */
+          // -----------------------------------------
+          // INSERT PAYMENT
+          // -----------------------------------------
 
           const {
             error: dbError
@@ -1896,33 +2453,49 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
 
-          /*
-            Local status
-          */
-
           userData.paymentStatus =
             "pending";
 
           userData.paymentSubmittedAt =
-            new Date().toISOString();
+            new Date()
+              .toISOString();
 
           saveLocalData();
 
 
-          if (proMessage) {
+          if (
+            proMessage
+          ) {
 
-            proMessage.textContent =
-`✅ تم إرسال طلب الدفع بنجاح.
-
-سيتم مراجعة التحويل من الإدارة.
-
-بعد الموافقة سيتم تفعيل PRO.`;
+            proMessage.innerHTML =
+              `
+                <div class="pending-box">
+                  ✅ تم إرسال طلب الدفع بنجاح
+                  <br>
+                  طلبك حاليا قيد المراجعة.
+                </div>
+              `;
 
           }
 
 
           confirmPaymentBtn.textContent =
             "تم إرسال الطلب ✓";
+
+          confirmPaymentBtn.classList.add(
+            "hidden"
+          );
+
+
+          if (
+            requestProBtn
+          ) {
+
+            requestProBtn.classList.add(
+              "hidden"
+            );
+
+          }
 
 
           showMessage(
@@ -1938,13 +2511,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             error
           );
 
-
           confirmPaymentBtn.disabled =
             false;
 
           confirmPaymentBtn.textContent =
             "تأكيد الدفع";
-
 
           showMessage(
             error.message ||
@@ -1964,252 +2535,257 @@ document.addEventListener("DOMContentLoaded", async () => {
   // SIGN UP
   // =========================================================
 
-  $("#signupForm")?.addEventListener(
-    "submit",
-    async (event) => {
+  $("#signupForm")
+    ?.addEventListener(
+      "submit",
+      async (event) => {
 
-      event.preventDefault();
+        event.preventDefault();
 
-      if (!supabaseClient) {
+        if (!supabaseClient) {
 
-        showMessage(
-          "Supabase غير متصل",
-          "error"
-        );
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
 
-        return;
-      }
+          return;
 
+        }
 
-      const email =
-        $("#signupEmail")
-          ?.value
-          ?.trim();
+        const email =
+          $("#signupEmail")
+            ?.value
+            ?.trim();
 
-      const password =
-        $("#signupPassword")
-          ?.value;
+        const password =
+          $("#signupPassword")
+            ?.value;
 
+        if (
+          !email ||
+          !password
+        ) {
 
-      if (
-        !email ||
-        !password
-      ) {
+          showMessage(
+            "اكتب البريد وكلمة المرور",
+            "error"
+          );
 
-        showMessage(
-          "اكتب البريد وكلمة المرور",
-          "error"
-        );
+          return;
 
-        return;
-      }
+        }
 
+        if (
+          password.length < 6
+        ) {
 
-      if (
-        password.length < 6
-      ) {
+          showMessage(
+            "كلمة المرور لازم تكون 6 حروف أو أكثر",
+            "error"
+          );
 
-        showMessage(
-          "كلمة المرور لازم تكون 6 حروف أو أكثر",
-          "error"
-        );
+          return;
 
-        return;
-      }
+        }
 
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth
-          .signUp({
-            email,
-            password
-          });
-
-
-      if (error) {
-
-        console.error(
+        const {
+          data,
           error
-        );
+        } =
+          await supabaseClient.auth
+            .signUp({
 
-        showMessage(
-          error.message,
-          "error"
-        );
+              email,
 
-        return;
-      }
+              password
+
+            });
 
 
-      /*
-        لو Supabase محتاج تأكيد Email
-      */
+        if (error) {
 
-      if (
-        data?.session
-      ) {
-
-        showMessage(
-          "تم إنشاء الحساب وتسجيل الدخول",
-          "success"
-        );
-
-        await loadCurrentUser();
-
-      } else {
-
-        showMessage(
-          "تم إنشاء الحساب. راجع الإيميل لتأكيد الحساب ثم سجل الدخول.",
-          "success"
-        );
-
-        $("#signupBox")
-          ?.classList.add(
-            "hidden"
+          console.error(
+            error
           );
 
-        $("#loginBox")
-          ?.classList.remove(
-            "hidden"
+          showMessage(
+            error.message,
+            "error"
           );
 
-      }
+          return;
 
-    }
-  );
+        }
+
+
+        if (
+          data?.session
+        ) {
+
+          showMessage(
+            "تم إنشاء الحساب وتسجيل الدخول",
+            "success"
+          );
+
+          await loadCurrentUser();
+
+        } else {
+
+          showMessage(
+            "تم إنشاء الحساب. راجع الإيميل لتأكيد الحساب ثم سجل الدخول.",
+            "success"
+          );
+
+          $("#signupBox")
+            ?.classList.add(
+              "hidden"
+            );
+
+          $("#loginBox")
+            ?.classList.remove(
+              "hidden"
+            );
+
+        }
+
+      }
+    );
 
 
   // =========================================================
   // LOGIN
   // =========================================================
 
-  $("#loginForm")?.addEventListener(
-    "submit",
-    async (event) => {
+  $("#loginForm")
+    ?.addEventListener(
+      "submit",
+      async (event) => {
 
-      event.preventDefault();
+        event.preventDefault();
 
-      if (!supabaseClient) {
+        if (!supabaseClient) {
 
-        showMessage(
-          "Supabase غير متصل",
-          "error"
-        );
+          showMessage(
+            "Supabase غير متصل",
+            "error"
+          );
 
-        return;
-      }
+          return;
 
+        }
 
-      const email =
-        $("#loginEmail")
-          ?.value
-          ?.trim();
+        const email =
+          $("#loginEmail")
+            ?.value
+            ?.trim();
 
-      const password =
-        $("#loginPassword")
-          ?.value;
+        const password =
+          $("#loginPassword")
+            ?.value;
 
+        if (
+          !email ||
+          !password
+        ) {
 
-      if (
-        !email ||
-        !password
-      ) {
+          showMessage(
+            "اكتب البريد وكلمة المرور",
+            "error"
+          );
 
-        showMessage(
-          "اكتب البريد وكلمة المرور",
-          "error"
-        );
+          return;
 
-        return;
-      }
+        }
 
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth
-          .signInWithPassword({
-
-            email,
-
-            password
-
-          });
-
-
-      if (error) {
-
-        console.error(
+        const {
+          data,
           error
-        );
+        } =
+          await supabaseClient.auth
+            .signInWithPassword({
+
+              email,
+
+              password
+
+            });
+
+
+        if (error) {
+
+          console.error(
+            error
+          );
+
+          showMessage(
+            error.message,
+            "error"
+          );
+
+          return;
+
+        }
+
+        if (
+          !data?.session
+        ) {
+
+          showMessage(
+            "لم يتم إنشاء جلسة دخول",
+            "error"
+          );
+
+          return;
+
+        }
 
         showMessage(
-          error.message,
-          "error"
+          "تم تسجيل الدخول بنجاح",
+          "success"
         );
 
-        return;
+        await loadCurrentUser();
+
       }
-
-
-      if (!data?.session) {
-
-        showMessage(
-          "لم يتم إنشاء جلسة دخول",
-          "error"
-        );
-
-        return;
-      }
-
-
-      showMessage(
-        "تم تسجيل الدخول بنجاح",
-        "success"
-      );
-
-
-      await loadCurrentUser();
-
-    }
-  );
+    );
 
 
   // =========================================================
   // LOGOUT
   // =========================================================
 
-  $("#logoutBtn")?.addEventListener(
-    "click",
-    async () => {
+  $("#logoutBtn")
+    ?.addEventListener(
+      "click",
+      async () => {
 
-      if (supabaseClient) {
+        if (
+          supabaseClient
+        ) {
 
-        await supabaseClient.auth.signOut();
+          await supabaseClient.auth
+            .signOut();
+
+        }
+
+        userData = {};
+
+        localStorage.removeItem(
+          STORAGE_KEY
+        );
+
+        showScreen(
+          "authScreen"
+        );
+
+        showMessage(
+          "تم تسجيل الخروج",
+          "success"
+        );
 
       }
-
-      userData = {};
-
-      localStorage.removeItem(
-        STORAGE_KEY
-      );
-
-      showScreen(
-        "authScreen"
-      );
-
-      showMessage(
-        "تم تسجيل الخروج",
-        "success"
-      );
-
-    }
-  );
+    );
 
 
   // =========================================================
@@ -2235,15 +2811,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       return;
+
     }
 
 
     try {
-
-      /*
-        نستخدم getSession
-        عشان نضمن وجود session.
-      */
 
       const {
         data: sessionData
@@ -2251,10 +2823,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         await supabaseClient.auth
           .getSession();
 
-
       const session =
         sessionData?.session;
-
 
       if (!session) {
 
@@ -2263,16 +2833,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
         return;
-      }
 
+      }
 
       const user =
         session.user;
 
 
+      // ADMIN
+      userData.isAdmin =
+        user.email
+          ?.toLowerCase() ===
+        ADMIN_EMAIL
+          .toLowerCase();
+
+
+      userData.email =
+        user.email;
+
+
       await loadProfileFromSupabase(
         user
       );
+
+
+      await loadMyPaymentStatus();
 
 
       if (
@@ -2288,12 +2873,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
 
+      if (
+        userData.isAdmin
+      ) {
+
+        $("#adminBtn")
+          ?.classList.remove(
+            "hidden"
+          );
+
+      }
+
+
     } catch (error) {
 
       console.error(
         error
       );
-
 
       if (
         userData.profileCompleted
@@ -2318,7 +2914,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // LOAD PROFILE
   // =========================================================
 
-  async function loadProfileFromSupabase(user) {
+  async function loadProfileFromSupabase(
+    user
+  ) {
 
     if (!supabaseClient) {
       return;
@@ -2331,9 +2929,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         error
       } =
         await supabaseClient
-          .from("profiles")
+          .from(
+            "profiles"
+          )
           .select("*")
-          .eq("id", user.id)
+          .eq(
+            "id",
+            user.id
+          )
           .maybeSingle();
 
 
@@ -2345,6 +2948,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
         return;
+
       }
 
 
@@ -2419,17 +3023,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         Boolean(
 
           data.full_name &&
+
           data.birth_date &&
+
           data.height &&
+
           data.weight &&
+
           data.goal &&
+
           data.activity
 
         );
 
 
       saveLocalData();
-
 
     } catch (error) {
 
@@ -2456,10 +3064,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       now.toLocaleDateString(
         "ar-EG",
         {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric"
+
+          weekday:
+            "long",
+
+          year:
+            "numeric",
+
+          month:
+            "long",
+
+          day:
+            "numeric"
+
         }
       );
 
@@ -2511,43 +3128,487 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // =========================================================
-  // AUTH SCREEN SWITCH
+  // AUTH SWITCH
   // =========================================================
 
-  $("#showSignup")?.addEventListener(
-    "click",
-    () => {
+  $("#showSignup")
+    ?.addEventListener(
+      "click",
+      () => {
 
-      $("#loginBox")
-        ?.classList.add(
-          "hidden"
-        );
+        $("#loginBox")
+          ?.classList.add(
+            "hidden"
+          );
 
-      $("#signupBox")
-        ?.classList.remove(
-          "hidden"
-        );
+        $("#signupBox")
+          ?.classList.remove(
+            "hidden"
+          );
+
+      }
+    );
+
+
+  $("#showLogin")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        $("#signupBox")
+          ?.classList.add(
+            "hidden"
+          );
+
+        $("#loginBox")
+          ?.classList.remove(
+            "hidden"
+          );
+
+      }
+    );
+
+
+  // =========================================================
+  // ADMIN PANEL
+  // =========================================================
+
+  async function openAdminPanel() {
+
+    if (
+      !supabaseClient
+    ) {
+      return;
+    }
+
+    const {
+      data: sessionData
+    } =
+      await supabaseClient.auth
+        .getSession();
+
+    const user =
+      sessionData
+        ?.session
+        ?.user;
+
+    if (!user) {
+      return;
+    }
+
+    if (
+      user.email
+        ?.toLowerCase() !==
+      ADMIN_EMAIL
+        .toLowerCase()
+    ) {
+
+      showMessage(
+        "غير مسموح لك بالدخول",
+        "error"
+      );
+
+      return;
 
     }
-  );
+
+    showScreen(
+      "adminScreen"
+    );
+
+    await loadAdminRequests();
+
+  }
 
 
-  $("#showLogin")?.addEventListener(
-    "click",
-    () => {
+  async function loadAdminRequests() {
 
-      $("#signupBox")
-        ?.classList.add(
-          "hidden"
+    const list =
+      $("#adminRequests");
+
+    if (!list) {
+      return;
+    }
+
+    list.innerHTML = `
+      <div class="empty-state">
+        جاري تحميل الطلبات...
+      </div>
+    `;
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from(
+          "payment_requests"
+        )
+        .select(
+          "*"
+        )
+        .order(
+          "created_at",
+          {
+            ascending:
+              false
+          }
         );
 
-      $("#loginBox")
-        ?.classList.remove(
-          "hidden"
-        );
+
+    if (error) {
+
+      console.error(
+        error
+      );
+
+      list.innerHTML = `
+        <div class="admin-error">
+          فشل تحميل الطلبات
+          <br>
+          ${escapeHTML(
+            error.message
+          )}
+        </div>
+      `;
+
+      return;
 
     }
-  );
+
+
+    if (!data?.length) {
+
+      list.innerHTML = `
+        <div class="empty-state">
+          مفيش طلبات دفع حاليا
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      data
+        .map(
+          (request) => {
+
+            const status =
+              request.status ||
+              "pending";
+
+            const date =
+              request.created_at
+                ? new Date(
+                    request.created_at
+                  ).toLocaleString(
+                    "ar-EG"
+                  )
+                : "غير معروف";
+
+
+            return `
+
+              <div
+                class="admin-request"
+                data-id="${escapeHTML(
+                  request.id
+                )}"
+              >
+
+                <div
+                  class="admin-request-header"
+                >
+
+                  <div>
+
+                    <span
+                      class="small-label"
+                    >
+                      PAYMENT REQUEST
+                    </span>
+
+                    <h3>
+                      طلب PRO
+                    </h3>
+
+                  </div>
+
+                  <span
+                    class="
+                      status-badge
+                      status-${escapeHTML(
+                        status
+                      )}
+                    "
+                  >
+                    ${status === "pending"
+                      ? "قيد المراجعة"
+                      : status === "approved"
+                      ? "مقبول"
+                      : status === "rejected"
+                      ? "مرفوض"
+                      : escapeHTML(status)}
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="admin-info"
+                >
+
+                  <div>
+                    <span>المستخدم</span>
+                    <strong>
+                      ${escapeHTML(
+                        request.user_id
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>المبلغ</span>
+                    <strong>
+                      ${escapeHTML(
+                        request.amount
+                      )} جنيه
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>طريقة الدفع</span>
+                    <strong>
+                      ${escapeHTML(
+                        request.payment_method
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>التاريخ</span>
+                    <strong>
+                      ${escapeHTML(
+                        date
+                      )}
+                    </strong>
+                  </div>
+
+                </div>
+
+
+                ${
+                  request.screenshot_url
+                    ? `
+                      <a
+                        href="${escapeHTML(
+                          request.screenshot_url
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="screenshot-btn"
+                      >
+                        🖼️ فتح صورة التحويل
+                      </a>
+                    `
+                    : ""
+                }
+
+
+                <div
+                  class="admin-actions"
+                >
+
+                  <button
+                    class="approve-btn"
+                    data-action="approve"
+                    data-id="${escapeHTML(
+                      request.id
+                    )}"
+                    ${
+                      status === "approved"
+                        ? "disabled"
+                        : ""
+                    }
+                  >
+                    ✅ موافقة
+                  </button>
+
+                  <button
+                    class="reject-btn"
+                    data-action="reject"
+                    data-id="${escapeHTML(
+                      request.id
+                    )}"
+                    ${
+                      status === "rejected"
+                        ? "disabled"
+                        : ""
+                    }
+                  >
+                    ❌ رفض
+                  </button>
+
+                </div>
+
+              </div>
+
+            `;
+
+          }
+        )
+        .join("");
+
+
+    $$(".approve-btn")
+      .forEach(
+        (button) => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              await updatePaymentStatus(
+                button.dataset.id,
+                "approved"
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+    $$(".reject-btn")
+      .forEach(
+        (button) => {
+
+          button.addEventListener(
+            "click",
+            async () => {
+
+              await updatePaymentStatus(
+                button.dataset.id,
+                "rejected"
+              );
+
+            }
+          );
+
+        }
+      );
+
+  }
+
+
+  async function updatePaymentStatus(
+    id,
+    status
+  ) {
+
+    if (
+      !id ||
+      !supabaseClient
+    ) {
+      return;
+    }
+
+    const note =
+      status === "approved"
+        ? "تمت الموافقة على الدفع"
+        : "تم رفض طلب الدفع";
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "payment_requests"
+        )
+        .update({
+
+          status,
+
+          admin_note:
+            note,
+
+          reviewed_at:
+            new Date()
+              .toISOString()
+
+        })
+        .eq(
+          "id",
+          id
+        );
+
+
+    if (error) {
+
+      console.error(
+        error
+      );
+
+      showMessage(
+        "فشل تحديث الطلب: " +
+        error.message,
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    showMessage(
+      status === "approved"
+        ? "تمت الموافقة وتفعيل الطلب"
+        : "تم رفض الطلب",
+      "success"
+    );
+
+
+    await loadAdminRequests();
+
+  }
+
+
+  $("#adminBtn")
+    ?.addEventListener(
+      "click",
+      async () => {
+
+        await openAdminPanel();
+
+      }
+    );
+
+
+  $("#backDashboardBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        showDashboard();
+
+      }
+    );
+
+
+  $("#refreshAdminBtn")
+    ?.addEventListener(
+      "click",
+      async () => {
+
+        await loadAdminRequests();
+
+      }
+    );
 
 
   // =========================================================
